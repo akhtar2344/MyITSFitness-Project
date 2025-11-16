@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShowController;
@@ -53,3 +53,66 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
 
     // Dashboard lecturer
     Route::view('/dashboard', 'lecturer.dashboard.dashboard')->name('dashboard');
+
+    // ===== Students List & Detail ===== Ahmad Faiz Ramdhani
+    // List students -> resources/views/lecturer/index.blade.php
+    Route::get('/students', function () {
+        return view('lecturer.index');
+    })->name('students.index');
+
+     // Detail student -> resources/views/lecturer/show.blade.php
+    Route::get('/students/{nrp}', function (string $nrp) {
+        // Jika show.blade.php kamu masih static, ini tetap aman.
+        // Kalau nanti mau dinamis, tinggal lempar data di sini.
+        return view('lecturer.show', compact('nrp'));
+    })->whereNumber('nrp')->name('students.show');
+
+     /* ====== NEW: Lecturer Status Account (untuk halaman seperti figma) ====== */
+    Route::get('/status/{nrp}', function (string $nrp) {
+        return view('lecturer.status-account', compact('nrp'));
+    })->whereNumber('nrp')->name('status.account');
+    /* ======================================================================= */
+
+    // (Opsional lama) contoh /lecturer/show dummy — dibiarkan karena path beda
+    Route::get('/show', function () {
+        $submission = [
+            'id'           => '5026231006',
+            'student_name' => 'Benedict',
+            'nrp'          => '5026231006',
+            'submitted_at' => '2024-12-11',
+            'activity'     => 'Running',
+            'location'     => 'Pakuwon City',
+            'duration'     => '2 Hour',
+            'status'       => 'Accepted',
+            'proof_url'    => asset('images/sample-proof.jpg'),
+        ];
+        $comments = [
+            ['name' => 'Heru Susanto', 'avatar' => asset('images/lecturer.png'), 'text' => 'Good work!'],
+        ];
+        return view('lecturer.show', compact('submission', 'comments'));
+    })->name('show');
+});
+
+/* -------------------------------------------------------------
+| LECTURER REVIEWS (List + Action Dummies)
+|--------------------------------------------------------------*/
+Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () {
+    Route::view('/', 'lecturer.reviews.sublec')->name('index');
+    Route::view('/sublec', 'lecturer.reviews.sublec')->name('sublec');
+
+    Route::post('/{submission}/accept', function ($submission) {
+        return back()->with('ok', "Submission {$submission} accepted");
+    })->name('accept');
+
+    Route::post('/{submission}/reject', function ($submission) {
+        return back()->with('ok', "Submission {$submission} rejected");
+    })->name('reject');
+
+    Route::post('/{submission}/request-revision', function ($submission) {
+        return back()->with('ok', "Revision requested for {$submission}");
+    })->name('requestRevision');
+
+    Route::post('/{submission}/comment', function ($submission) {
+        return back()->with('ok', "Comment sent for {$submission}");
+    })->name('comment');
+});
