@@ -59,3 +59,10 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     Route::get('/students', function () {
         return view('lecturer.index');
     })->name('students.index');
+
+     // Detail student -> resources/views/lecturer/show.blade.php
+    Route::get('/students/{nrp}', function (string $nrp) {
+        // Jika show.blade.php kamu masih static, ini tetap aman.
+        // Kalau nanti mau dinamis, tinggal lempar data di sini.
+        return view('lecturer.show', compact('nrp'));
+    })->whereNumber('nrp')->name('students.show');
