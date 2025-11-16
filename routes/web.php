@@ -167,7 +167,7 @@ Route::get('/student/login/myits', function () {
 | STUDENT DASHBOARD ADDED| Akhtar Fattan Widodo - 5026231044
 |--------------------------------------------------------------*/
 
-// Halaman student index diarahkan ke dashboard student
+    // Halaman student index diarahkan ke dashboard student
     Route::redirect('/', '/student/dashboard')->name('index');
 
     // ===== Status Page =====
@@ -178,3 +178,8 @@ Route::get('/student/login/myits', function () {
         // render blade baru status-account; sementara boleh statis (Harry)
         return view('student.status-account', compact('nrp'));
     })->whereNumber('nrp')->name('status.account');
+
+/* -------------------------------------------------------------
+| DEFAULT / HOME: Akhtar Fattan Widodo - 5026231044
+|--------------------------------------------------------------*/
+Route::view('/', 'welcome')->name('home');
