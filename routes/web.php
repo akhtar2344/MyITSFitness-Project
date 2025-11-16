@@ -94,7 +94,7 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
 });
 
 /* -------------------------------------------------------------
-| LECTURER REVIEWS (List + Action Dummies)
+| LECTURER REVIEWS (List + Action Dummies) - Marvello Adipertama
 |--------------------------------------------------------------*/
 Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () {
     Route::view('/', 'lecturer.reviews.sublec')->name('index');
@@ -115,4 +115,50 @@ Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () 
     Route::post('/{submission}/comment', function ($submission) {
         return back()->with('ok', "Comment sent for {$submission}");
     })->name('comment');
+
+/* -------------------------------------------------------------
+| AUTHENTICATION  - Ahmad Faiz Ramdhani
+|--------------------------------------------------------------*/
+Route::view('/login', 'login')->name('login');
+
+Route::post('/login', function () {
+    // sementara redirect ke dashboard lecturer
+    return redirect()->route('lecturer.index');
+})->name('login.process');
+
+Route::get('/login/myits', function () {
+    return redirect()->route('lecturer.index');
+})->name('login.myits');
+
+/* ===== Lecturer Login (baru) ===== */
+Route::get('/lecturer/login', function () {
+    return view('lecturer.auth.login-lecturer');
+})->name('lecturer.login');
+
+Route::post('/lecturer/login', function () {
+    // sementara: langsung masuk ke dashboard lecturer
+    return redirect()->route('lecturer.dashboard');
+})->name('lecturer.login.process');
+
+Route::get('/lecturer/login/myits', function () {
+    // sementara: langsung masuk ke dashboard lecturer
+    return redirect()->route('lecturer.dashboard');
+})->name('lecturer.login.myits');
+/* ===== end Lecturer Login ===== */
+
+/* ===== Student Login (baru) ===== */
+Route::get('/student/login', function () {
+    return view('student.auth.login-student');
+})->name('student.login');
+
+Route::post('/student/login', function () {
+    // setelah login langsung ke dashboard student
+    return redirect()->route('student.dashboard');
+})->name('student.login.process');
+
+Route::get('/student/login/myits', function () {
+    // setelah login langsung ke dashboard student
+    return redirect()->route('student.dashboard');
+})->name('student.login.myits');
+/* ===== end Student Login ===== */
 });
