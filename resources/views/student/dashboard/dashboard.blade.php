@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard | myITS Fitness</title>
 
-  {{-- Akhtar Fattan Widodo (5026231044) --}}
-  
   {{-- Tailwind --}}
   <script src="https://cdn.tailwindcss.com"></script>
 

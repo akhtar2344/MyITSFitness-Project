@@ -48,8 +48,8 @@ Route::prefix('student')->name('student.')->group(function () {
 | LECTURER SECTION
 |--------------------------------------------------------------*/
 Route::prefix('lecturer')->name('lecturer.')->group(function () {
-    // Halaman “root” lecturer (kalau ada landing khusus)
+    // Halaman “root” lecturer (kalau ada landing khusus): CREATED BY Akhtar Fattan Widodo (5026231044)
     Route::view('/', 'lecturer.index')->name('index');
 
-    // Dashboard lecturer
+    // Dashboard lecturer: CREATED BY Akhtar Fattan Widodo (5026231044)
     Route::view('/dashboard', 'lecturer.dashboard.dashboard')->name('dashboard');
