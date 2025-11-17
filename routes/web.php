@@ -19,7 +19,7 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::view('/submit', 'student.submit')->name('submit');
 
     // ===== Status Page =====
-    Route::view('/status', 'student.status')->name('status');
+    Route::view('/status', 'student.status-page')->name('status');
 
     // ===== Activity Details (mock Harry) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
