@@ -183,3 +183,6 @@ Route::get('/student/login/myits', function () {
 | DEFAULT / HOME: Akhtar Fattan Widodo - 5026231044
 |--------------------------------------------------------------*/
 Route::view('/', 'welcome')->name('home');
+| STUDENT DASHBOARD | Taffy Nirarale Kamajaya - 5026221047
+|--------------------------------------------------------------*/
+Route::view('/student/dashboard', 'student.dashboard.dashboard')->name('student.dashboard');
