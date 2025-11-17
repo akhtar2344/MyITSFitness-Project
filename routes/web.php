@@ -38,3 +38,8 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::get('/submissions/edit', [ShowController::class, 'edit'])->name('submissions.edit');
     Route::get('/{id}', [ShowController::class, 'show'])->whereNumber('id')->name('show');
 });
+
+/* -------------------------------------------------------------
+| STUDENT DASHBOARD | Taffy Nirarale Kamajaya - 5026221047
+|--------------------------------------------------------------*/
+Route::view('/student/dashboard', 'student.dashboard.dashboard')->name('student.dashboard');
