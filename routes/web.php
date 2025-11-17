@@ -59,6 +59,7 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     Route::get('/students', function () {
         return view('lecturer.index');
     })->name('students.index');
+    })->name('students.index');
 
      // Detail student -> resources/views/lecturer/show.blade.php
     Route::get('/students/{nrp}', function (string $nrp) {
