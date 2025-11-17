@@ -18,6 +18,9 @@ Route::prefix('student')->name('student.')->group(function () {
     // ===== Submit Page =====
     Route::view('/submit', 'student.submit')->name('submit');
 
+    // ===== Status Page =====
+    Route::view('/status', 'student.status')->name('status');
+
     // ===== Activity Details (mock Harry) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
     Route::view('/activity/harry/accepted', 'student.activity.show-accepted')->name('activity.show.accepted');
@@ -115,6 +118,7 @@ Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () 
     Route::post('/{submission}/comment', function ($submission) {
         return back()->with('ok', "Comment sent for {$submission}");
     })->name('comment');
+});
 
 /* -------------------------------------------------------------
 | AUTHENTICATION  - Ahmad Faiz Ramdhani
@@ -161,5 +165,4 @@ Route::get('/student/login/myits', function () {
     return redirect()->route('student.dashboard');
 })->name('student.login.myits');
 /* ===== end Student Login ===== */
-});
 
