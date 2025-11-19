@@ -11,6 +11,7 @@ class ActivityController extends Controller
     public function index()
     {
         return Activity::paginate(10);
+        
     }
 
     public function show(string $id)
