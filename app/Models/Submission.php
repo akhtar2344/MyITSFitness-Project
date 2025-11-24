@@ -2,110 +2,67 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Submission extends Model
 {
-    use HasFactory;
+    use HasUuids;
 
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS CONSTANTS
-    |--------------------------------------------------------------------------
-    */
-    public const STATUS_PENDING       = 'pending';
-    public const STATUS_ACCEPTED      = 'accepted';
-    public const STATUS_REJECTED      = 'rejected';
-    public const STATUS_NEED_REVISION = 'need_revision';
-
-    protected $table = 'submissions';
+    protected $table = 'submission';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'student_id',
-        'lecturer_id',
-        'activity',
-        'location',
-        'duration_minutes',
+        'activity_id',
         'status',
-        'submitted_at',
-        'reviewed_at',
+        'notes',
+        'canceled_at',
+        'duration_minutes',
     ];
 
     protected $casts = [
-        'submitted_at'     => 'datetime',
-        'reviewed_at'      => 'datetime',
-        'duration_minutes' => 'integer',
+        'canceled_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONSHIPS
-    |--------------------------------------------------------------------------
-    */
-
+    // Relationships
     public function student()
     {
-        return $this->belongsTo(People::class, 'student_id');
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function lecturer()
+    public function activity()
     {
-        return $this->belongsTo(People::class, 'lecturer_id');
+        return $this->belongsTo(Activity::class, 'activity_id');
     }
 
-    public function files()
+    public function comments()
     {
-        return $this->hasMany(Shared::class);
+        return $this->hasMany(Comment::class, 'submission_id');
     }
 
-    public function notifies()
+    public function fileAttachments()
     {
-        return $this->hasMany(Notify::class);
+        return $this->hasMany(FileAttachment::class, 'submission_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSORS
-    |--------------------------------------------------------------------------
-    */
-
-    public function getDurationHumanAttribute(): string
+    public function revisionRequests()
     {
-        $m = (int) ($this->duration_minutes ?? 0);
-        if ($m <= 0) return '0m';
-
-        $h = intdiv($m, 60);
-        $r = $m % 60;
-
-        if ($h && $r) return "{$h}h {$r}m";
-        if ($h) return "{$h}h";
-        return "{$r}m";
+        return $this->hasMany(RevisionRequest::class, 'submission_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SCOPES
-    |--------------------------------------------------------------------------
-    */
-
-    public function scopePending($q)
+    public function statusHistories()
     {
-        return $q->where('status', self::STATUS_PENDING);
+        return $this->hasMany(StatusHistory::class, 'submission_id');
     }
 
-    public function scopeAccepted($q)
+    public function notifications()
     {
-        return $q->where('status', self::STATUS_ACCEPTED);
-    }
-
-    public function scopeRejected($q)
-    {
-        return $q->where('status', self::STATUS_REJECTED);
-    }
-
-    public function scopeNeedRevision($q)
-    {
-        return $q->where('status', self::STATUS_NEED_REVISION);
+        return $this->hasMany(Notification::class, 'related_submission_id');
     }
 }
+
