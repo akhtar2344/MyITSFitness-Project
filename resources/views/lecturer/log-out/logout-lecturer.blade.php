@@ -37,7 +37,7 @@
         <img src="{{ asset('images/logout-overlay.png') }}"
              alt="Logout Overlay"
              class="w-[160px] h-auto select-none pointer-events-none absolute -top-3 right-0" />
-        <a href="{{ route('lecturer.login') }}"
+        <a href="{{ route('login') }}"
            class="absolute right-0 top-0 flex items-center gap-2 justify-center bg-[#f43f5e] hover:bg-[#e11d48] text-white font-medium px-6 py-2.5 rounded-xl shadow-md transition-all"
            style="clip-path: polygon(100% 0%, 100% 100%, 0 100%, 0 0); width: 145px;">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
