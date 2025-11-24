@@ -31,7 +31,7 @@
              class="w-9 h-9 rounded-full object-cover cursor-pointer select-none">
         {{-- Logout overlay (same behavior as other lecturer pages) --}}
         <div id="logoutOverlay" class="hidden absolute right-0 top-[3.25rem] z-50">
-          <a href="{{ route('lecturer.login') }}" class="block cursor-pointer">
+          <a href="{{ route('login') }}" class="block cursor-pointer">
             <img src="{{ asset('images/logout-overlay.png') }}" alt="Logout"
                  class="block w-[130px] max-w-none h-auto drop-shadow-xl transition-transform duration-200 hover:scale-105">
           </a>

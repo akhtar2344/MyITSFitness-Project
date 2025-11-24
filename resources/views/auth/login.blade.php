@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lecturer Login | myITS Fitness</title>
+  <title>Login | myITS Fitness</title>
 
   {{-- Tailwind CDN --}}
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,13 +15,43 @@
     html, body {
       font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
     }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .snackbar-enter {
+      animation: slideIn 0.3s ease-in-out;
+    }
+
+    .snackbar-exit {
+      animation: slideOut 0.3s ease-in-out;
+    }
   </style>
 </head>
 
 <body class="bg-white text-slate-800">
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
 
-    {{-- Kiri: ilustrasi (lebih turun, rapat ke bawah) --}}
+    {{-- Kiri: ilustrasi --}}
     <div class="hidden lg:flex items-end justify-center bg-[#f6f9ff]">
       <img
         src="{{ asset('images/login-illustration-lecturer.png') }}"
@@ -49,12 +79,12 @@
         {{-- Greeting --}}
         <div class="pt-2">
           <h2 class="text-2xl font-extrabold text-slate-900">
-            Hi, <span class="text-[#2d6df6]">Verifier</span>
+            Hi, <span class="text-[#2d6df6]">Welcome</span>
           </h2>
         </div>
 
         {{-- Form --}}
-        <form action="{{ route('lecturer.login.process') }}" method="POST" class="space-y-4">
+        <form action="{{ route('login.process') }}" method="POST" class="space-y-4">
           @csrf
           <div>
             <label class="block text-sm font-medium mb-1">MyITS Email</label>
@@ -62,9 +92,13 @@
               type="email"
               name="email"
               placeholder="enter your MyITS email"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2d6df6]/20 outline-none"
+              value="{{ old('email') }}"
+              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2d6df6]/20 outline-none @error('email') border-red-500 @enderror"
               required
             >
+            @error('email')
+              <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
           </div>
 
           <div>
@@ -75,7 +109,7 @@
                 type="password"
                 name="password"
                 placeholder="enter your password"
-                class="w-full border rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-[#2d6df6]/20 outline-none"
+                class="w-full border rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-[#2d6df6]/20 outline-none @error('password') border-red-500 @enderror"
                 required
               >
               <button type="button" id="togglePassword" class="absolute right-3 top-2.5 text-slate-400">
@@ -88,6 +122,9 @@
                 </svg>
               </button>
             </div>
+            @error('password')
+              <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
           </div>
 
           <button
@@ -107,7 +144,7 @@
 
         {{-- Login with MyITS --}}
         <a
-          href="{{ route('lecturer.login.myits') }}"
+          href="{{ route('login.myits') }}"
           class="w-full flex items-center justify-center gap-2 border rounded-lg py-2.5 text-slate-700 hover:bg-slate-50 transition"
         >
           <img src="{{ asset('images/myits-icon.png') }}" alt="myITS Icon" class="h-5 w-5">
@@ -117,27 +154,79 @@
     </div>
   </div>
 
+  {{-- Snackbar Container --}}
+  <div id="snackbarContainer" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
+
   <script>
+    // Password toggle functionality
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
     const eyeIcon = document.querySelector('#eyeIcon');
 
-    togglePassword.addEventListener('click', () => {
-      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-      password.setAttribute('type', type);
+    if (togglePassword) {
+      togglePassword.addEventListener('click', () => {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
 
-      // Ubah icon jadi mata tertutup
-      eyeIcon.innerHTML = type === 'password'
-        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 
-            8.268 2.943 9.542 7-1.274 4.057-5.064 
-            7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`
-        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 
-            0-8.268-2.943-9.542-7a9.965 9.965 0 012.803-4.362M9.88 
-            9.88A3 3 0 0114.12 14.12M6.1 6.1l11.8 11.8"/>`;
+        eyeIcon.innerHTML = type === 'password'
+          ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 
+              8.268 2.943 9.542 7-1.274 4.057-5.064 
+              7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`
+          : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 
+              0-8.268-2.943-9.542-7a9.965 9.965 0 012.803-4.362M9.88 
+              9.88A3 3 0 0114.12 14.12M6.1 6.1l11.8 11.8"/>`;
+      });
+    }
+
+    // Snackbar functionality
+    function showSnackbar(message, type = 'info', duration = 5000) {
+      const container = document.getElementById('snackbarContainer');
+      
+      const snackbar = document.createElement('div');
+      snackbar.className = `snackbar-enter p-4 rounded-lg text-white text-sm font-medium shadow-lg max-w-xs w-full`;
+      
+      // Set background color based on type
+      if (type === 'success') {
+        snackbar.classList.add('bg-green-500');
+      } else if (type === 'error') {
+        snackbar.classList.add('bg-red-500');
+      } else if (type === 'warning') {
+        snackbar.classList.add('bg-yellow-500');
+      } else {
+        snackbar.classList.add('bg-blue-500');
+      }
+      
+      snackbar.textContent = message;
+      container.appendChild(snackbar);
+      
+      // Auto remove after duration
+      setTimeout(() => {
+        snackbar.classList.remove('snackbar-enter');
+        snackbar.classList.add('snackbar-exit');
+        
+        setTimeout(() => {
+          snackbar.remove();
+        }, 300);
+      }, duration);
+    }
+
+    // Show snackbar on page load if there's a success message
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const successMessage = '{{ session("success") }}';
+      const errorMessage = '{{ $errors->first() }}';
+      
+      if (successMessage) {
+        showSnackbar(successMessage, 'success');
+      }
+      
+      if (errorMessage) {
+        showSnackbar(errorMessage, 'error');
+      }
     });
   </script>
 </body>

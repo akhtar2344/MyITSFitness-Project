@@ -2,10 +2,19 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShowController;
+use App\Http\Controllers\AuthController;
 
-/* -------------------------------------------------------------
-| STUDENT DASHBOARD | Taffy Nirarale Kamajaya - 5026221047
-|--------------------------------------------------------------*/
+/* =============================================================
+   AUTHENTICATION - Unified Login
+   ============================================================= */
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process');
+Route::get('/login/myits', [AuthController::class, 'loginWithMyITS'])->name('login.myits');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+/* =============================================================
+   STUDENT DASHBOARD
+   ============================================================= */
 Route::view('/student/dashboard', 'student.dashboard.dashboard')->name('student.dashboard');
 
 /*
@@ -44,7 +53,7 @@ Route::prefix('student')->name('student.')->group(function () {
     })->name('show.test');
 
     Route::get('/submissions/edit', [ShowController::class, 'edit'])->name('submissions.edit');
-    Route::get('/{id}', [ShowController::class, 'show'])->whereNumber('id')->name('show');
+    Route::get('/{id}', [ShowController::class, 'show'])->name('show');
 });
 
 /* -------------------------------------------------------------
@@ -64,16 +73,16 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     })->name('students.index');
 
      // Detail student -> resources/views/lecturer/show.blade.php
-    Route::get('/students/{nrp}', function (string $nrp) {
+    Route::get('/students/{id}', function (string $id) {
         // Jika show.blade.php kamu masih static, ini tetap aman.
         // Kalau nanti mau dinamis, tinggal lempar data di sini.
-        return view('lecturer.show', compact('nrp'));
-    })->whereNumber('nrp')->name('students.show');
+        return view('lecturer.show', compact('id'));
+    })->name('students.show');
 
      /* ====== NEW: Lecturer Status Account (untuk halaman seperti figma) ====== */
-    Route::get('/status/{nrp}', function (string $nrp) {
-        return view('lecturer.status-account', compact('nrp'));
-    })->whereNumber('nrp')->name('status.account');
+    Route::get('/status/{id}', function (string $id) {
+        return view('lecturer.status-account', compact('id'));
+    })->name('status.account');
     /* ======================================================================= */
 
     // (Opsional lama) contoh /lecturer/show dummy — dibiarkan karena path beda
@@ -120,49 +129,5 @@ Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () 
     })->name('comment');
 });
 
-/* -------------------------------------------------------------
-| AUTHENTICATION  - Ahmad Faiz Ramdhani
-|--------------------------------------------------------------*/
-Route::view('/login', 'login')->name('login');
-
-Route::post('/login', function () {
-    // sementara redirect ke dashboard lecturer
-    return redirect()->route('lecturer.index');
-})->name('login.process');
-
-Route::get('/login/myits', function () {
-    return redirect()->route('lecturer.index');
-})->name('login.myits');
-
-/* ===== Lecturer Login (baru) ===== */
-Route::get('/lecturer/login', function () {
-    return view('lecturer.auth.login-lecturer');
-})->name('lecturer.login');
-
-Route::post('/lecturer/login', function () {
-    // sementara: langsung masuk ke dashboard lecturer
-    return redirect()->route('lecturer.dashboard');
-})->name('lecturer.login.process');
-
-Route::get('/lecturer/login/myits', function () {
-    // sementara: langsung masuk ke dashboard lecturer
-    return redirect()->route('lecturer.dashboard');
-})->name('lecturer.login.myits');
-/* ===== end Lecturer Login ===== */
-
-/* ===== Student Login (baru) ===== */
-Route::get('/student/login', function () {
-    return view('student.auth.login-student');
-})->name('student.login');
-
-Route::post('/student/login', function () {
-    // setelah login langsung ke dashboard student
-    return redirect()->route('student.dashboard');
-})->name('student.login.process');
-
-Route::get('/student/login/myits', function () {
-    // setelah login langsung ke dashboard student
-    return redirect()->route('student.dashboard');
-})->name('student.login.myits');
-/* ===== end Student Login ===== */
+/* ===== REMOVED: Old authentication routes replaced with unified AuthController ===== */
 
