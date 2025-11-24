@@ -119,7 +119,7 @@
             <div class="col-span-12 lg:col-span-8">
 
               <h1 class="text-4xl font-extrabold tracking-tight">
-                Hi, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5b83ff] to-[#7b61ff]">Student</span>
+                Hi, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5b83ff] to-[#7b61ff]">{{ $student->name ?? 'Student' }}</span>
               </h1>
 
               {{-- Statistik --}}
@@ -130,15 +130,15 @@
                   <div class="flex flex-col items-center">
                     <canvas id="skemChart" width="68" height="68"></canvas>
                     <div class="mt-2 text-center">
-                      <div class="text-lg font-semibold">3</div>
+                      <div class="text-lg font-semibold">{{ $totalSubmissions }}</div>
                       <div class="text-xs text-slate-500">Activity</div>
                     </div>
                   </div>
 
                   {{-- Widget Pending --}}
                   <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span class="text-blue-600 font-semibold text-lg">1</span>
+                      <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span class="text-blue-600 font-semibold text-lg">{{ $pendingCount }}</span>
                     </div>
                     <div class="mt-2 text-center">
                       <div class="text-xs text-slate-500">Pending</div>
@@ -147,8 +147,8 @@
 
                   {{-- Widget Accepted --}}
                   <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                      <span class="text-green-600 font-semibold text-lg">1</span>
+                      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                      <span class="text-green-600 font-semibold text-lg">{{ $acceptedCount }}</span>
                     </div>
                     <div class="mt-2 text-center">
                       <div class="text-xs text-slate-500">Accepted</div>
@@ -157,8 +157,8 @@
 
                   {{-- Widget Need Revision --}}
                   <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
-                      <span class="text-yellow-600 font-semibold text-lg">1</span>
+                      <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
+                      <span class="text-yellow-600 font-semibold text-lg">{{ $needRevisionCount }}</span>
                     </div>
                     <div class="mt-2 text-center">
                       <div class="text-xs text-slate-500">Need Revision</div>
@@ -169,102 +169,63 @@
 
               {{-- Timeline --}}
               <div class="mt-6 space-y-6 max-h-[760px] overflow-y-auto nice-scroll pr-1">
+                @forelse($recentSubmissions as $idx => $submission)
+                  @php
+                    $activity = $submission->activity;
+                    $status = $submission->status;
+                    // Map status to route mock pages
+                    $routeMap = [
+                      'Pending' => 'student.activity.show.pending',
+                      'Accepted' => 'student.activity.show.accepted',
+                      'NeedRevision' => 'student.activity.show.needrevision',
+                      'Rejected' => 'student.activity.show.pending',
+                    ];
+                    $routeName = $routeMap[$status] ?? 'student.activity.show.pending';
 
-                {{-- Item 1 (terbaru) => Pending --}}
-                <a href="{{ route('student.activity.show.pending') }}"
-                   class="group relative block rounded-2xl bg-white border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg">
-                  <div class="hover-glow absolute inset-0 pointer-events-none z-[1]"></div>
-                  <article class="relative z-[2]">
-                    <div class="p-4">
-                      <div class="relative h-64 rounded-xl overflow-hidden">
-                        <img src="{{ asset('images/harrystyles-proof3.png') }}" alt="Activity Proof 3" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
-                        <div class="absolute top-3 left-4 text-white">
-                          <div class="text-3xl font-semibold">Running</div>
-                          <div class="text-xs opacity-90">02/11/2025</div>
-                        </div>
-                      </div>
-                      <div class="grid grid-cols-3 gap-4 mt-4 items-center">
-                        <div>
-                          <div class="text-slate-500 text-sm">Duration</div>
-                          <div class="font-semibold">1,5 Hours</div>
-                        </div>
-                        <div class="border-l pl-4">
-                          <div class="text-slate-500 text-sm">Location</div>
-                          <div class="font-semibold">KONI</div>
-                        </div>
-                        <div class="border-l pl-4">
-                          <div class="text-slate-500 text-sm">Status</div>
-                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">Pending</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </a>
+                    $badge = [
+                      'Pending' => ['bg' => 'bg-blue-100','text' => 'text-blue-700'],
+                      'Accepted' => ['bg' => 'bg-emerald-100','text' => 'text-emerald-700'],
+                      'NeedRevision' => ['bg' => 'bg-amber-100','text' => 'text-amber-700'],
+                      'Rejected' => ['bg' => 'bg-red-100','text' => 'text-red-700'],
+                    ][$status] ?? ['bg' => 'bg-gray-100','text' => 'text-gray-700'];
 
-                {{-- Item 2 => Accepted --}}
-                <a href="{{ route('student.activity.show.accepted') }}"
-                   class="group relative block rounded-2xl bg-white border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg">
-                  <div class="hover-glow absolute inset-0 pointer-events-none z-[1]"></div>
-                  <article class="relative z-[2]">
-                    <div class="p-4">
-                      <div class="relative h-64 rounded-xl overflow-hidden">
-                        <img src="{{ asset('images/harrystyles-proof2.png') }}" alt="Running 2" class="timeline-img rounded-t-xl scale-[1.08]">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
-                        <div class="absolute top-3 left-4 text-white">
-                          <div class="text-3xl font-semibold">Running</div>
-                          <div class="text-xs opacity-90">01/11/2025</div>
-                        </div>
-                      </div>
-                      <div class="grid grid-cols-3 gap-4 mt-4 items-center">
-                        <div>
-                          <div class="text-slate-500 text-sm">Duration</div>
-                          <div class="font-semibold">1,5 Hours</div>
-                        </div>
-                        <div class="border-l pl-4">
-                          <div class="text-slate-500 text-sm">Location</div>
-                          <div class="font-semibold">KONI</div>
-                        </div>
-                        <div class="border-l pl-4">
-                          <div class="text-slate-500 text-sm">Status</div>
-                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">Accepted</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </a>
+                    $imgList = ['harrystyles-proof3.png','harrystyles-proof2.png','harrystyles-proof1.png'];
+                    $img = asset('images/' . $imgList[$idx % count($imgList)]);
+                  @endphp
 
-                {{-- Item 3 (terlama) => Need Revision --}}
-                <a href="{{ route('student.activity.show.needrevision') }}"
-                   class="group relative block rounded-2xl bg-white border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg">
-                  <div class="hover-glow absolute inset-0 pointer-events-none z-[1]"></div>
-                  <article class="relative z-[2]">
-                    <div class="p-4">
-                      <div class="relative h-64 rounded-xl overflow-hidden flex">
-                        <img src="{{ asset('images/harrystyles-proof1.png') }}" alt="Running 1" class="timeline-img rounded-t-xl scale-[1.08]">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
-                        <div class="absolute top-3 left-4 text-white">
-                          <div class="text-3xl font-semibold">Running</div>
-                          <div class="text-xs opacity-90">28/10/2025</div>
+                  <a href="{{ route($routeName) }}"
+                     class="group relative block rounded-2xl bg-white border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="hover-glow absolute inset-0 pointer-events-none z-[1]"></div>
+                    <article class="relative z-[2]">
+                      <div class="p-4">
+                        <div class="relative h-64 rounded-xl overflow-hidden">
+                          <img src="{{ $img }}" alt="Activity Proof" class="w-full h-full object-cover">
+                          <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+                          <div class="absolute top-3 left-4 text-white">
+                            <div class="text-3xl font-semibold">{{ $activity->name ?? 'Activity' }}</div>
+                            <div class="text-xs opacity-90">{{ optional($submission->created_at)->format('d/m/Y') }}</div>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mt-4 items-center">
+                          <div>
+                            <div class="text-slate-500 text-sm">Duration</div>
+                            <div class="font-semibold">{{ round(($submission->duration_minutes ?? 0) / 60, 2) }} Hours</div>
+                          </div>
+                          <div class="border-l pl-4">
+                            <div class="text-slate-500 text-sm">Location</div>
+                            <div class="font-semibold">{{ $activity->location ?? '—' }}</div>
+                          </div>
+                          <div class="border-l pl-4">
+                            <div class="text-slate-500 text-sm">Status</div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $badge['bg'] }} {{ $badge['text'] }}">{{ $status }}</span>
+                          </div>
                         </div>
                       </div>
-                      <div class="grid grid-cols-3 gap-4 mt-4 items-center">
-                        <div>
-                          <div class="text-slate-500 text-sm">Duration</div>
-                          <div class="font-semibold">1,5 Hours</div>
-                        </div>
-                        <div class="border-l pl-4">
-                          <div class="text-slate-500 text-sm">Location</div>
-                          <div class="font-semibold">KONI</div>
-                        </div>
-                        <div class="border-l pl-4">
-                          <div class="text-slate-500 text-sm">Status</div>
-                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-700">Need Revision</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </a>
+                    </article>
+                  </a>
+                @empty
+                  <div class="rounded-2xl bg-white border p-6 text-center">No submissions yet.</div>
+                @endforelse
               </div>
             </div>
 
@@ -298,14 +259,14 @@
     new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Activity', 'Remaining'],
-        datasets: [{
-          data: [3, 29],
-          backgroundColor: ['#3B82F6', '#E5E7EB'],
-          borderWidth: 0,
-          cutout: '70%',
-        }]
-      },
+          labels: ['Activity', 'Remaining'],
+          datasets: [{
+            data: [{{ $totalSubmissions ?? 0 }}, {{ max(0, 30 - ($totalSubmissions ?? 0)) }}],
+            backgroundColor: ['#3B82F6', '#E5E7EB'],
+            borderWidth: 0,
+            cutout: '70%',
+          }]
+        },
       options: {
         responsive: false,
         plugins: { legend: { display: false } }

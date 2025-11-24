@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShowController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StudentDashboardController;
 
 /* =============================================================
    AUTHENTICATION - Unified Login
@@ -15,7 +16,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 /* =============================================================
    STUDENT DASHBOARD
    ============================================================= */
-Route::view('/student/dashboard', 'student.dashboard.dashboard')->name('student.dashboard');
+Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
 
 /*
 |--------------------------------------------------------------------------
