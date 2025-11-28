@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShowController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\Student\SubmissionManagementController;
+use App\Http\Controllers\Student\SubmissionDetailController;
 
 /* =============================================================
    AUTHENTICATION - Unified Login
@@ -31,6 +33,9 @@ Route::prefix('student')->name('student.')->group(function () {
     // ===== Status Page =====
     Route::view('/status', 'student.status-page')->name('status');
 
+    // ===== Submission Detail Page (NEW - Dynamic) =====
+    Route::get('/submissions/{submission}/view', [SubmissionDetailController::class, 'show'])->name('submissions.show');
+
     // ===== Activity Details (mock Harry) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
     Route::view('/activity/harry/accepted', 'student.activity.show-accepted')->name('activity.show.accepted');
@@ -53,7 +58,8 @@ Route::prefix('student')->name('student.')->group(function () {
         return view('student.show', compact('student', 'id'));
     })->name('show.test');
 
-    Route::get('/submissions/edit', [ShowController::class, 'edit'])->name('submissions.edit');
+    Route::get('/submissions/edit', [SubmissionManagementController::class, 'edit'])->name('submissions.edit');
+    Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
     Route::get('/{id}', [ShowController::class, 'show'])->name('show');
 });
 
