@@ -176,32 +176,19 @@
 
                 <tbody id="studentTable" class="text-slate-800">
                   @php
-                    $rows = [
-                      ['name'=>'Harry Styles','activity'=>'Running','date'=>'November 2, 2024','status'=>'Pending'],
-                      ['name'=>'Harry Styles','activity'=>'Running','date'=>'October 2, 2024','status'=>'Accepted'],
-                      ['name'=>'Harry Styles','activity'=>'Running','date'=>'October 1, 2024','status'=>'Need Revision'],
-                    ];
                     $badge = [
                       'Pending'       => 'bg-blue-100 text-blue-600',
                       'Accepted'      => 'bg-green-100 text-green-700',
                       'Rejected'      => 'bg-rose-100 text-rose-700',
-                      'Need Revision' => 'bg-amber-100 text-amber-700',
-                    ];
-
-                    /* Tambahan: target detail per status (tidak mengubah yang lain) */
-                    $detailHref = [
-                      'Pending'       => route('student.activity.show.pending'),
-                      'Accepted'      => route('student.activity.show.accepted'),
-                      'Need Revision' => route('student.activity.show.needrevision'),
-                      'Rejected'      => '#',
+                      'NeedRevision'  => 'bg-amber-100 text-amber-700',
                     ];
                   @endphp
 
-                  @foreach ($rows as $i => $r)
+                  @forelse ($submissions as $i => $submission)
                     <tr
                       class="student-row group {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }} hover:bg-slate-50 transition-colors duration-200 cursor-pointer"
-                      data-status="{{ $r['status'] }}"
-                      data-href="{{ $detailHref[$r['status']] ?? '#' }}"
+                      data-status="{{ $submission->status }}"
+                      data-href="{{ route('student.submissions.show', $submission->id) }}"
                       tabindex="0"
                       role="button"
                     >
@@ -209,32 +196,38 @@
                         <span class="font-semibold text-slate-900 transition duration-200
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $r['name'] }}
+                          {{ $student->name ?? 'Unknown' }}
                         </span>
                       </td>
                       <td class="px-8 py-4">
                         <span class="font-semibold text-slate-600 transition duration-200
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $r['activity'] }}
+                          {{ $submission->activity->name ?? '—' }}
                         </span>
                       </td>
                       <td class="px-8 py-4">
                         <span class="font-semibold text-slate-600 transition duration-200
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $r['date'] }}
+                          {{ $submission->created_at->format('F j, Y') }}
                         </span>
                       </td>
                       <td class="px-8 py-4">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition duration-200
-                                    {{ $badge[$r['status']] ?? 'bg-slate-100 text-slate-600' }}
+                                    {{ $badge[$submission->status] ?? 'bg-slate-100 text-slate-600' }}
                                     group-hover:bg-blue-100 group-hover:text-blue-600">
-                          {{ $r['status'] }}
+                          {{ str_replace('NeedRevision', 'Need Revision', $submission->status) }}
                         </span>
                       </td>
                     </tr>
-                  @endforeach
+                  @empty
+                    <tr class="bg-white">
+                      <td colspan="4" class="px-8 py-12 text-center text-slate-500">
+                        <p>No submissions yet. <a href="{{ route('student.submit') }}" class="text-blue-600 hover:underline">Submit your first activity</a></p>
+                      </td>
+                    </tr>
+                  @endforelse
 
                 </tbody>
               </table>

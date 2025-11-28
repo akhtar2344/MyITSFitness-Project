@@ -128,8 +128,10 @@
 
       <!-- Content -->
       <section class="col-span-12 md:col-span-9">
-        <a href="{{ route('student.submit') }}" class="inline-flex items-center gap-2 text-slate-600 underline underline-offset-4 hover:text-slate-800 transition-colors font-medium">
-          <img src="{{ asset('images/back-arrow.png') }}" alt="Back" class="w-5 h-5 object-contain">
+        <a href="{{ route('student.submit') }}" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
           <span>Back to selecting activity</span>
         </a>
 
@@ -269,7 +271,12 @@
         </aside>
 
         <section class="col-span-12 md:col-span-9">
-          <a href="{{ route('student.submit') }}" class="text-slate-500 underline underline-offset-4">⮜ Back to selecting activity</a>
+          <a href="{{ route('student.submit') }}" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors font-medium">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            <span>Back to selecting activity</span>
+          </a>
           <div class="mt-6 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center py-24 px-8 text-center min-h-[560px] md:min-h-[640px]">
             <h1 class="text-2xl md:text-3xl font-extrabold text-[#0a1a33] mb-2">
               Activity submitted!
