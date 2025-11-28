@@ -187,11 +187,13 @@
 
               <div class="mt-6">
                 <label class="block text-sm font-semibold text-slate-600">Certificate or Membership (Optional)</label>
-                <label for="certInput" class="dropzone mt-2 flex h-44 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-center">
-                  <div class="space-y-1">
-                    <p class="text-slate-600 font-semibold">PNG, JPEG, JPG</p>
-                    <p class="text-xs text-slate-400">10 MB MAX</p>
-                    <p id="certName" class="text-xs text-slate-500"></p>
+                <label for="certInput" class="dropzone mt-2 flex h-44 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-center overflow-hidden bg-slate-50">
+                  <div id="certPreviewContainer" class="space-y-1 w-full h-full flex items-center justify-center">
+                    <div class="space-y-1">
+                      <p class="text-slate-600 font-semibold">PNG, JPEG, JPG</p>
+                      <p class="text-xs text-slate-400">10 MB MAX</p>
+                      <p id="certName" class="text-xs text-slate-500"></p>
+                    </div>
                   </div>
                 </label>
                 <input id="certInput" type="file" accept="image/png,image/jpeg" class="hidden">
@@ -201,11 +203,13 @@
             <!-- Right -->
             <div class="col-span-12 lg:col-span-5">
               <label class="block text-sm font-semibold text-slate-600">Activity Proof</label>
-              <label for="proofInput" class="dropzone mt-2 flex h-64 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-center">
-                <div class="space-y-1">
-                  <p class="text-slate-600 font-semibold">PNG, JPEG, JPG</p>
-                  <p class="text-xs text-slate-400">10 MB MAX</p>
-                  <p id="proofName" class="text-xs text-slate-500"></p>
+              <label for="proofInput" class="dropzone mt-2 flex h-64 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-center overflow-hidden bg-slate-50">
+                <div id="proofPreviewContainer" class="space-y-1 w-full h-full flex items-center justify-center">
+                  <div class="space-y-1">
+                    <p class="text-slate-600 font-semibold">PNG, JPEG, JPG</p>
+                    <p class="text-xs text-slate-400">10 MB MAX</p>
+                    <p id="proofName" class="text-xs text-slate-500"></p>
+                  </div>
                 </div>
               </label>
               <input id="proofInput" type="file" accept="image/png,image/jpeg" class="hidden">
@@ -353,6 +357,45 @@
       el.addEventListener('change', updateSubmitState);
     });
     updateSubmitState();
+
+    // Image preview function
+    function createImagePreview(file, container) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        container.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover rounded-xl">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Proof image preview
+    proofInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const proofPreviewContainer = document.getElementById('proofPreviewContainer');
+        
+        // Show filename
+        document.getElementById('proofName').textContent = file.name;
+        
+        // Show preview
+        createImagePreview(file, proofPreviewContainer);
+        
+        updateSubmitState();
+      }
+    });
+
+    // Certificate image preview
+    certInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const certPreviewContainer = document.getElementById('certPreviewContainer');
+        
+        // Show filename
+        document.getElementById('certName').textContent = file.name;
+        
+        // Show preview
+        createImagePreview(file, certPreviewContainer);
+      }
+    });
 
     // Calendar init: format dd/mm/Y & block future date
     (function(){
