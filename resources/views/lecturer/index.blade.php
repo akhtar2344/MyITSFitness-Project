@@ -179,7 +179,7 @@
                     <tr class="student-row group cursor-pointer {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }} hover:bg-slate-50 transition-colors duration-200" data-status="{{ $r['status'] }}">
                       {{-- NAME (link to status-account) --}}
                       <td class="px-8 py-4">
-                        <a href="{{ route('lecturer.status.account', ['nrp' => $r['nrp']]) }}"
+                        <a href="{{ route('lecturer.status.account', ['id' => $r['nrp']]) }}"
                            class="font-semibold text-slate-900 transition duration-200
                                   group-hover:text-transparent group-hover:bg-clip-text
                                   group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
@@ -189,7 +189,7 @@
 
                       {{-- NRP (link to status-account) --}}
                       <td class="px-8 py-4">
-                        <a href="{{ route('lecturer.status.account', ['nrp' => $r['nrp']]) }}"
+                        <a href="{{ route('lecturer.status.account', ['id' => $r['nrp']]) }}"
                            class="inline-block font-semibold text-slate-600 transition duration-200
                                   group-hover:text-transparent group-hover:bg-clip-text
                                   group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
@@ -199,7 +199,7 @@
 
                       {{-- PROGRAM (link to status-account) --}}
                       <td class="px-8 py-4">
-                        <a href="{{ route('lecturer.status.account', ['nrp' => $r['nrp']]) }}"
+                        <a href="{{ route('lecturer.status.account', ['id' => $r['nrp']]) }}"
                            class="inline-block font-semibold text-slate-600 transition duration-200
                                   group-hover:text-transparent group-hover:bg-clip-text
                                   group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">

@@ -69,6 +69,24 @@
     <img src="{{ asset('images/back-ornament.png') }}" class="hidden lg:block fixed right-4 top-56 h-[460px] opacity-10 select-none pointer-events-none" style="transform:scaleX(-1);" alt="">
 
     <div class="max-w-7xl mx-auto px-6 py-8">
+      {{-- Notification Alert --}}
+      @if (session('success'))
+      <div id="successAlert" class="mb-6 rounded-xl border border-emerald-300 bg-emerald-50 p-4 flex items-center gap-3 shadow-sm">
+        <div class="flex-1">
+          <p class="text-emerald-900 font-medium">{{ session('success') }}</p>
+        </div>
+        <button onclick="document.getElementById('successAlert').remove()" class="text-emerald-700 hover:text-emerald-900">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <script>
+        setTimeout(() => {
+          const alert = document.getElementById('successAlert');
+          if (alert) alert.remove();
+        }, 4000);
+      </script>
+      @endif
+
       <div class="grid grid-cols-12 gap-8">
         {{-- Sidebar --}}
         <aside class="col-span-12 md:col-span-3">
@@ -98,7 +116,7 @@
 
         {{-- Content --}}
         <section class="col-span-12 md:col-span-9">
-          <h1 class="text-4xl font-extrabold tracking-tight">Hi, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5b83ff] to-[#7b61ff]">Verifier</span></h1>
+          <h1 class="text-4xl font-extrabold tracking-tight">Hi, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5b83ff] to-[#7b61ff]">{{ $lecturer->name ?? 'Lecturer' }}</span></h1>
 
           {{-- STATUS WIDGETS --}}
           <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
@@ -106,7 +124,7 @@
             <div class="rounded-2xl bg-white border shadow-sm ring-2 ring-slate-300">
               <div class="h-full p-5 flex flex-col">
                 <p class="text-slate-500 text-sm leading-snug min-h-[40px]">Total Submission</p>
-                <div class="mt-auto text-4xl font-extrabold leading-none">8</div>
+                <div class="mt-auto text-4xl font-extrabold leading-none">{{ $totalSubmissions }}</div>
               </div>
             </div>
 
@@ -116,7 +134,7 @@
                 <p class="text-slate-500 text-sm leading-snug min-h-[40px]">
                   Pending <span class="hidden md:inline">Submission</span>
                 </p>
-                <div class="mt-auto text-4xl font-extrabold leading-none">2</div>
+                <div class="mt-auto text-4xl font-extrabold leading-none">{{ $pendingCount }}</div>
               </div>
             </div>
 
@@ -126,7 +144,7 @@
                 <p class="text-slate-500 text-sm leading-snug min-h-[40px]">
                   Accepted <span class="hidden md:inline">Submission</span>
                 </p>
-                <div class="mt-auto text-4xl font-extrabold leading-none">4</div>
+                <div class="mt-auto text-4xl font-extrabold leading-none">{{ $acceptedCount }}</div>
               </div>
             </div>
 
@@ -134,7 +152,7 @@
             <div class="rounded-2xl bg-white border shadow-sm ring-2 ring-amber-300">
               <div class="h-full p-5 flex flex-col">
                 <p class="text-slate-500 text-sm leading-snug min-h-[40px]">Need Revision</p>
-                <div class="mt-auto text-4xl font-extrabold leading-none">1</div>
+                <div class="mt-auto text-4xl font-extrabold leading-none">{{ $needRevisionCount }}</div>
               </div>
             </div>
 
@@ -144,7 +162,7 @@
                 <p class="text-slate-500 text-sm leading-snug min-h-[40px]">
                   Rejected <span class="hidden md:inline">Submission</span>
                 </p>
-                <div class="mt-auto text-4xl font-extrabold leading-none">1</div>
+                <div class="mt-auto text-4xl font-extrabold leading-none">{{ $rejectedCount }}</div>
               </div>
             </div>
           </div>
@@ -168,12 +186,12 @@
                 <div class="col-span-12 md:col-span-7">
                   @php
                     $stats = [
-                      'Accepted Submission' => 4,
-                      'Pending Submission'  => 2,
-                      'Need Revision'       => 1,
-                      'Rejected Submission' => 1,
+                      'Accepted Submission' => $acceptedCount,
+                      'Pending Submission'  => $pendingCount,
+                      'Need Revision'       => $needRevisionCount,
+                      'Rejected Submission' => $rejectedCount,
                     ];
-                    $totalSubmission = array_sum($stats);
+                    $totalSubmission = $totalSubmissions;
                   @endphp
                   <ul class="space-y-2 text-[13px] leading-5"> {{-- was text-sm space-y-3 --}}
                     <li class="flex items-center gap-2.5">
@@ -322,57 +340,58 @@
                 </thead>
                 <tbody class="text-slate-800">
                   @php
-                    $rows = [
-                      ['name'=>'Harry Styles',   'activity'=>'Running',   'date'=>'Nov 2, 2024', 'status'=>'Pending',       'proof'=>asset('images/harrystyles-procon.png')],
-                      ['name'=>'T. Hiddleston',  'activity'=>'Soccer',    'date'=>'Nov 3, 2024', 'status'=>'Pending',       'proof'=>asset('images/hiddleston-procon.png')],
-                      ['name'=>'A. Taylor',      'activity'=>'Chess',     'date'=>'Nov 3, 2024', 'status'=>'Need Revision', 'proof'=>asset('images/a.taylor-procon.png')],
-                      ['name'=>'S. Ohtani',      'activity'=>'Baseball',  'date'=>'Dec 5, 2024', 'status'=>'Accepted',      'proof'=>asset('images/s.ohtani-procon.png')],
-                      ['name'=>'S. Curry',       'activity'=>'Basketball','date'=>'Dec 6, 2024', 'status'=>'Accepted',      'proof'=>asset('images/s.curry-procon.png')],
-                      ['name'=>'K. Middleton',   'activity'=>'Tennis',    'date'=>'Dec 10, 2024','status'=>'Rejected',      'proof'=>asset('images/m.middleton-procon.png')],
-                      ['name'=>'Benedict',       'activity'=>'Running',   'date'=>'Dec 11, 2024','status'=>'Accepted',      'proof'=>asset('images/benedict-procon.png')],
-                      ['name'=>'V. Beckham',     'activity'=>'Gym',       'date'=>'Dec 11, 2024','status'=>'Accepted',      'proof'=>asset('images/v.beckham-procon.png')],
-                    ];
                     $badge = [
                       'Pending'       => 'bg-blue-100 text-blue-600',
                       'Accepted'      => 'bg-green-100 text-green-700',
                       'Rejected'      => 'bg-rose-100  text-rose-700',
-                      'Need Revision' => 'bg-amber-100 text-amber-700',
+                      'NeedRevision'  => 'bg-amber-100 text-amber-700',
                     ];
                   @endphp
 
-                  @foreach ($rows as $i => $r)
-                    <tr class="group {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }} hover:bg-slate-50 transition-colors duration-200">
+                  @forelse ($recentSubmissions as $i => $submission)
+                    <tr class="group {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }} hover:bg-slate-50 transition-colors duration-200 cursor-pointer"
+                        onclick="window.location='{{ route('lecturer.submissions.show', $submission->id) }}'">
                       <td class="px-8 py-5 align-middle">
                         <span class="font-semibold text-slate-900
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $r['name'] }}
+                          {{ $submission->student->name ?? 'N/A' }}
                         </span>
                       </td>
                       <td class="px-8 py-5 align-middle">
                         <span class="text-slate-700
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $r['activity'] }}
+                          {{ $submission->activity->name ?? 'N/A' }}
                         </span>
                       </td>
                       <td class="px-8 py-5 align-middle">
                         <span class="text-slate-700
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $r['date'] }}
+                          {{ $submission->created_at->format('M d, Y') }}
                         </span>
                       </td>
                       <td class="px-8 py-5 align-middle">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $badge[$r['status']] ?? 'bg-slate-100 text-slate-600' }}">
-                          {{ $r['status'] }}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $badge[$submission->status] ?? 'bg-slate-100 text-slate-600' }}">
+                          {{ $submission->status === 'NeedRevision' ? 'Need Revision' : $submission->status }}
                         </span>
                       </td>
                       <td class="px-8 py-5 align-middle">
-                        <img src="{{ $r['proof'] }}" alt="proof" class="w-8 h-8 rounded-full object-cover border shadow-sm">
+                        @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
+                          <img src="{{ $submission->fileAttachments->first()->url }}" alt="proof" class="w-8 h-8 rounded-full object-cover border shadow-sm">
+                        @else
+                          <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-500">N/A</div>
+                        @endif
                       </td>
                     </tr>
-                  @endforeach
+                  @empty
+                    <tr>
+                      <td colspan="5" class="px-8 py-8 text-center text-slate-500">
+                        No recent submissions
+                      </td>
+                    </tr>
+                  @endforelse
                 </tbody>
               </table>
             </div>
