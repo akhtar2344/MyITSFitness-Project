@@ -193,10 +193,10 @@
                       <div class="p-4">
                         <div class="relative h-64 rounded-xl overflow-hidden">
                           <img src="{{ $img }}" alt="Activity Proof" class="w-full h-full object-cover">
-                          <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+                          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                           <div class="absolute top-3 left-4 text-white">
-                            <div class="text-3xl font-semibold">{{ $activity->name ?? 'Activity' }}</div>
-                            <div class="text-xs opacity-90">{{ optional($submission->created_at)->format('d/m/Y') }}</div>
+                            <div class="text-3xl font-semibold drop-shadow-lg">{{ $activity->name ?? 'Activity' }}</div>
+                            <div class="text-xs opacity-90 drop-shadow-md">{{ optional($submission->created_at)->format('d/m/Y') }}</div>
                           </div>
                         </div>
                         <div class="grid grid-cols-3 gap-4 mt-4 items-center">
@@ -279,8 +279,8 @@
       const monthName = months[now.getMonth()];
       const yearNum = now.getFullYear();
 
-      // Atur awal semester (example: 1 Aug)
-      const ACADEMIC_START = new Date(yearNum, 7, 1);
+      // Atur awal semester (untuk mendapat 14th Lecture Week pada 28 Nov 2025)
+      const ACADEMIC_START = new Date(yearNum, 7, 27);
 
       const week = Math.max(1, Math.floor((now - ACADEMIC_START) / (1000*60*60*24*7)) + 1);
 

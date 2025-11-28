@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\Student\SubmissionManagementController;
 use App\Http\Controllers\Student\SubmissionDetailController;
+use App\Http\Controllers\Student\StatusPageController;
 use App\Models\Comment;
 
 /* =============================================================
@@ -31,8 +32,8 @@ Route::prefix('student')->name('student.')->group(function () {
     // ===== Submit Page =====
     Route::view('/submit', 'student.submit')->name('submit');
 
-    // ===== Status Page =====
-    Route::view('/status', 'student.status-page')->name('status');
+    // ===== Status Page (Dynamic - with real submissions) =====
+    Route::get('/status', [StatusPageController::class, 'index'])->name('status');
 
     // ===== Submission Detail Page (Dynamic) =====
     Route::get('/submissions/{submission}/view', [SubmissionDetailController::class, 'show'])->name('submissions.show');
