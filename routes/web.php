@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\Student\SubmissionManagementController;
 use App\Http\Controllers\Student\SubmissionDetailController;
+use App\Models\Comment;
 
 /* =============================================================
    AUTHENTICATION - Unified Login
@@ -33,13 +34,13 @@ Route::prefix('student')->name('student.')->group(function () {
     // ===== Status Page =====
     Route::view('/status', 'student.status-page')->name('status');
 
-    // ===== Submission Detail Page (NEW - Dynamic) =====
+    // ===== Submission Detail Page (Dynamic) =====
     Route::get('/submissions/{submission}/view', [SubmissionDetailController::class, 'show'])->name('submissions.show');
 
-    // ===== Activity Details (mock Harry) =====
+    // ===== Activity Details (Mock Harry - static views) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
     Route::view('/activity/harry/accepted', 'student.activity.show-accepted')->name('activity.show.accepted');
-    Route::view('/activity/harry/need-revision', 'student.activity.show-need-revision')->name('activity.show.needrevision');
+    Route::view('/activity/harry/need-revision', 'student.activity.show-needrevision')->name('activity.show.needrevision');
 
     // ===== Edit & Re-submit form =====
     Route::view('/activity/harry/edit', 'student.activity.edit-resubmit')->name('activity.edit');
@@ -60,6 +61,9 @@ Route::prefix('student')->name('student.')->group(function () {
 
     Route::get('/submissions/edit', [SubmissionManagementController::class, 'edit'])->name('submissions.edit');
     Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
+    Route::post('/submissions/{submission}/cancel', [SubmissionManagementController::class, 'cancel'])->name('submissions.cancel');
+    Route::post('/submissions/{submission}/comment', [SubmissionManagementController::class, 'storeComment'])->name('submissions.comment');
+    Route::delete('/comments/{comment}', [SubmissionManagementController::class, 'deleteComment'])->where('comment', '[a-f0-9\\-]+')->name('comments.delete');
     Route::get('/{id}', [ShowController::class, 'show'])->name('show');
 });
 

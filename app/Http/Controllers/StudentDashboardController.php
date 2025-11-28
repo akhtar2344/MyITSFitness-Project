@@ -25,14 +25,14 @@ class StudentDashboardController extends Controller
             return redirect()->route('login')->with('error', 'Student profile not found for current user');
         }
 
-        // Aggregate stats
+        // Aggregate stats (all submissions, since canceled ones are deleted)
         $totalSubmissions = $student->submissions()->count();
         $pendingCount = $student->submissions()->where('status', 'Pending')->count();
         $acceptedCount = $student->submissions()->where('status', 'Accepted')->count();
         // Note: DB enum uses 'NeedRevision'
         $needRevisionCount = $student->submissions()->where('status', 'NeedRevision')->count();
 
-        // Recent submissions (latest 5) - include fileAttachments for displaying uploaded proof images
+        // Recent submissions (latest 5) dengan eager load
         $recentSubmissions = $student->submissions()
             ->with(['activity', 'fileAttachments'])
             ->orderBy('created_at', 'desc')

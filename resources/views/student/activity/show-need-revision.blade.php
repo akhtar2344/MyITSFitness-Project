@@ -109,11 +109,19 @@
                       Need Revision
                     </span>
 
-                    <a href="{{ route('student.activity.edit', ['activity' => 'Running']) }}"
+                    <a href="{{ isset($submission) ? route('student.activity.edit', ['activity' => $submission->activity->name ?? 'Running']) : route('student.activity.edit', ['activity' => 'Running']) }}"
                        class="inline-flex items-center justify-center h-10 min-w-[108px] px-4 rounded-lg
                               text-white font-semibold bg-gradient-to-r from-[#6f7bff] to-[#7b61ff] shadow-sm">
                       Edit
                     </a>
+
+                    <button type="button"
+                            id="cancelBtn"
+                            class="h-10 px-5 rounded-lg border border-rose-400 text-rose-500 font-semibold bg-white
+                                   hover:bg-rose-50 hover:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-200
+                                   active:translate-y-px transition-colors">
+                      Cancel
+                    </button>
                   </div>
                 </div>
 
@@ -179,6 +187,26 @@
     </div>
   </main>
 
+  {{-- Modal: Cancel Submission --}}
+  <div id="cancelModal" class="hidden fixed inset-0 z-[100]">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative h-full w-full flex items-center justify-center p-4">
+      <div class="w-[540px] max-w-full rounded-2xl bg-white shadow-2xl">
+        <form id="cancelForm" method="POST" action="{{ isset($submission) ? route('submissions.cancel', $submission->id) : '#' }}" class="p-6 text-center">
+          @csrf
+          @method('POST')
+          <h3 class="text-[22px] font-bold text-[#3b6bff] mb-4">Cancel this submission?</h3>
+          <p class="text-slate-700 mb-6">Your current progress will not be saved.</p>
+
+          <div class="grid grid-cols-2 divide-x">
+            <button type="submit" id="confirmYes" class="py-3 font-semibold text-[#3b6bff] hover:bg-slate-50 transition">Yes, Cancel</button>
+            <button type="button" id="confirmNo" class="py-3 font-semibold text-slate-900 hover:bg-slate-50 transition">No, Keep it</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   {{-- Logout overlay logic --}}
   <script>
     (function () {
@@ -223,6 +251,80 @@
       });
 
       updateState();
+    })();
+
+    // Cancel modal logic with AJAX
+    (function () {
+      const openBtn  = document.getElementById('cancelBtn');
+      const modal    = document.getElementById('cancelModal');
+      const yesBtn   = document.getElementById('confirmYes');
+      const noBtn    = document.getElementById('confirmNo');
+      const cancelForm = document.getElementById('cancelForm');
+
+      function openModal(){ modal.classList.remove('hidden'); }
+      function closeModal(){ modal.classList.add('hidden'); }
+
+      function showToast(msg, type = 'success') {
+        const toast = document.createElement('div');
+        toast.textContent = msg;
+        toast.className = `fixed top-4 right-4 px-4 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${
+          type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
+        }`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      openBtn?.addEventListener('click', openModal);
+
+      // No → close modal
+      noBtn?.addEventListener('click', () => {
+        closeModal();
+      });
+
+      // Yes → AJAX POST to cancel submission
+      yesBtn?.addEventListener('click', async () => {
+        closeModal();
+        yesBtn.disabled = true;
+        const originalText = yesBtn.textContent;
+        yesBtn.textContent = 'Canceling...';
+
+        try {
+          const response = await fetch(cancelForm.action, {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => {
+              window.location.href = '{{ route("student.dashboard") }}';
+            }, 1500);
+          } else {
+            showToast(data.message || 'Error canceling submission', 'error');
+            yesBtn.disabled = false;
+            yesBtn.textContent = originalText;
+          }
+        } catch (error) {
+          showToast('Network error: ' + error.message, 'error');
+          yesBtn.disabled = false;
+          yesBtn.textContent = originalText;
+        }
+      });
+
+      // close on backdrop / Esc
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (!modal.classList.contains('hidden') && e.key === 'Escape') closeModal();
+      });
     })();
   </script>
 </body>
