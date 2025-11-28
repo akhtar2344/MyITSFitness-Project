@@ -65,6 +65,7 @@ class SubmissionDetailController extends Controller
             'submission' => $submission,
             'activity' => $submission->activity,
             'student' => $student,
+            'proofFile' => $proofFile,
             'proofImage' => $proofFile ? $proofFile->url : asset('images/placeholder.png'),
             'certificateFile' => $certificateFile,
             'revisionRequests' => $submission->revisionRequests,

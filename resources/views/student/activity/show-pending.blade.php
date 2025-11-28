@@ -165,15 +165,17 @@
     <div class="absolute inset-0 bg-black/60"></div>
     <div class="relative h-full w-full flex items-center justify-center p-4">
       <div class="w-[540px] max-w-full rounded-2xl bg-white shadow-2xl">
-        <div class="p-6 text-center">
+        <form id="cancelForm" method="POST" action="{{ isset($submission) ? route('submissions.cancel', $submission->id) : '#' }}" class="p-6 text-center">
+          @csrf
+          @method('POST')
           <h3 class="text-[22px] font-bold text-[#3b6bff] mb-4">Cancel this submission?</h3>
           <p class="text-slate-700 mb-6">Your current progress will not be saved.</p>
 
           <div class="grid grid-cols-2 divide-x">
-            <button id="confirmYes" class="py-3 font-semibold text-[#3b6bff] hover:bg-slate-50 transition">Yes</button>
-            <button id="confirmNo" class="py-3 font-semibold text-slate-900 hover:bg-slate-50 transition">No</button>
+            <button type="submit" id="confirmYes" class="py-3 font-semibold text-[#3b6bff] hover:bg-slate-50 transition">Yes, Cancel</button>
+            <button type="button" id="confirmNo" class="py-3 font-semibold text-slate-900 hover:bg-slate-50 transition">No, Keep it</button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   </div>
@@ -206,7 +208,7 @@
       });
     })();
 
-    // Cancel modal logic
+    // Cancel modal logic with AJAX
     (function () {
       const openBtn  = document.getElementById('cancelBtn');
       const modal    = document.getElementById('cancelModal');
@@ -214,36 +216,61 @@
       const noBtn    = document.getElementById('confirmNo');
       const toast    = document.getElementById('toast');
       const toastTxt = document.getElementById('toastText');
+      const cancelForm = document.getElementById('cancelForm');
 
       function openModal(){ modal.classList.remove('hidden'); }
       function closeModal(){ modal.classList.add('hidden'); }
 
+      function showToast(msg, type = 'success') {
+        toastTxt.textContent = msg;
+        toast.className = `fixed top-4 right-4 px-4 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${
+          type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
+        }`;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+      }
+
       openBtn?.addEventListener('click', openModal);
 
-      // No → back
+      // No → close modal
       noBtn?.addEventListener('click', () => {
         closeModal();
-        history.back();
       });
 
-      // Yes → show toast then redirect
-      yesBtn?.addEventListener('click', () => {
+      // Yes → AJAX POST to cancel submission
+      yesBtn?.addEventListener('click', async () => {
         closeModal();
-        // show toast
-        toastTxt.textContent = 'Activity has been discarded.';
-        toast.classList.remove('hidden');
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(8px)';
-        requestAnimationFrame(() => {
-          toast.style.transition = 'all .25s ease';
-          toast.style.opacity = '1';
-          toast.style.transform = 'translateY(0)';
-        });
+        yesBtn.disabled = true;
+        yesBtn.textContent = 'Canceling...';
 
-        // Redirect after short delay (ubah rute jika beda)
-        setTimeout(() => {
-          window.location.href = "{{ route('student.status') }}";
-        }, 900);
+        try {
+          const response = await fetch(cancelForm.action, {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => {
+              window.location.href = '{{ route("student.dashboard") }}';
+            }, 1500);
+          } else {
+            showToast(data.message || 'Error canceling submission', 'error');
+            yesBtn.disabled = false;
+            yesBtn.textContent = 'Yes, Cancel';
+          }
+        } catch (error) {
+          showToast('Network error: ' + error.message, 'error');
+          yesBtn.disabled = false;
+          yesBtn.textContent = 'Yes, Cancel';
+        }
       });
 
       // close on backdrop / Esc

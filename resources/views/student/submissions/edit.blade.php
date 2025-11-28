@@ -128,7 +128,10 @@
 
       <!-- Content -->
       <section class="col-span-12 md:col-span-9">
-        <a href="{{ route('student.submit') }}" class="text-slate-500 underline underline-offset-4">⮜ Back to selecting activity</a>
+        <a href="{{ route('student.submit') }}" class="inline-flex items-center gap-2 text-slate-600 underline underline-offset-4 hover:text-slate-800 transition-colors font-medium">
+          <img src="{{ asset('images/back-arrow.png') }}" alt="Back" class="w-5 h-5 object-contain">
+          <span>Back to selecting activity</span>
+        </a>
 
         {{-- Title --}}
         @if($isOther)

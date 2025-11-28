@@ -8,6 +8,7 @@ use App\Models\Submission;
 use App\Models\Activity;
 use App\Models\Student;
 use App\Models\FileAttachment;
+use App\Models\Comment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -129,6 +130,168 @@ class SubmissionManagementController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating submission: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel a submission - DELETE from database
+     * POST /student/submissions/{id}/cancel
+     */
+    public function cancel(Submission $submission)
+    {
+        // Get current logged-in student
+        $studentId = session('user_id');
+        
+        if (!$studentId) {
+            if (request()->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Please login first'], 401);
+            }
+            return redirect()->route('login')->with('error', 'Please login first');
+        }
+
+        // Get student record
+        $student = Student::where('user_id', $studentId)->firstOrFail();
+
+        // Check if submission belongs to logged-in student
+        if ($submission->student_id !== $student->id) {
+            if (request()->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Unauthorized: Cannot cancel this submission');
+        }
+
+        try {
+            $activityId = $submission->activity_id;
+            
+            // Delete file attachments from storage
+            $submission->fileAttachments()->each(function ($file) {
+                if ($file->url) {
+                    // Remove /storage/ prefix and delete from disk
+                    $path = str_replace('/storage/', '', $file->url);
+                    Storage::disk('public')->delete($path);
+                }
+                $file->delete();
+            });
+
+            // Delete submission
+            $submission->delete();
+
+            // Delete activity if no other submissions reference it
+            $activity = Activity::find($activityId);
+            if ($activity && $activity->submissions()->count() === 0) {
+                $activity->delete();
+            }
+
+            // If AJAX request, return JSON
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Submission canceled successfully'
+                ]);
+            }
+
+            return redirect()->route('student.dashboard')
+                ->with('success', 'Submission canceled successfully');
+
+        } catch (\Exception $e) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error canceling submission: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Error canceling submission: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Store a private comment on a submission
+     * POST /student/submissions/{id}/comment
+     */
+    public function storeComment(Submission $submission, Request $request)
+    {
+        // Get current logged-in student
+        $studentId = session('user_id');
+        
+        if (!$studentId) {
+            return response()->json(['success' => false, 'message' => 'Please login first'], 401);
+        }
+
+        // Get student record
+        $student = Student::where('user_id', $studentId)->firstOrFail();
+
+        // Check if submission belongs to logged-in student
+        if ($submission->student_id !== $student->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        // Validate comment
+        $validated = $request->validate([
+            'content' => 'required|string|max:500',
+        ]);
+
+        try {
+            // Create comment
+            $comment = $submission->comments()->create([
+                'student_id' => $student->id,
+                'body' => $validated['content'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment added successfully',
+                'comment' => [
+                    'id' => $comment->id,
+                    'name' => $student->name,
+                    'content' => $comment->body,
+                    'created_at' => $comment->created_at->format('M j, Y \a\t g:i A'),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error adding comment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a private comment
+     * DELETE /comments/{id}
+     */
+    public function deleteComment(Comment $comment)
+    {
+        // Get current logged-in student
+        $studentId = session('user_id');
+        
+        if (!$studentId) {
+            return response()->json(['success' => false, 'message' => 'Please login first'], 401);
+        }
+
+        // Get student record
+        $student = Student::where('user_id', $studentId)->firstOrFail();
+
+        // Check if comment belongs to logged-in student
+        if ($comment->student_id !== $student->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $comment->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting comment: ' . $e->getMessage()
             ], 500);
         }
     }
