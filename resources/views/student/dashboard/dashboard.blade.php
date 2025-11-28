@@ -173,14 +173,6 @@
                   @php
                     $activity = $submission->activity;
                     $status = $submission->status;
-                    // Map status to route mock pages
-                    $routeMap = [
-                      'Pending' => 'student.activity.show.pending',
-                      'Accepted' => 'student.activity.show.accepted',
-                      'NeedRevision' => 'student.activity.show.needrevision',
-                      'Rejected' => 'student.activity.show.pending',
-                    ];
-                    $routeName = $routeMap[$status] ?? 'student.activity.show.pending';
 
                     $badge = [
                       'Pending' => ['bg' => 'bg-blue-100','text' => 'text-blue-700'],
@@ -189,11 +181,12 @@
                       'Rejected' => ['bg' => 'bg-red-100','text' => 'text-red-700'],
                     ][$status] ?? ['bg' => 'bg-gray-100','text' => 'text-gray-700'];
 
-                    $imgList = ['harrystyles-proof3.png','harrystyles-proof2.png','harrystyles-proof1.png'];
-                    $img = asset('images/' . $imgList[$idx % count($imgList)]);
+                    // Get proof image from FileAttachment (FIXED: use actual uploaded image)
+                    $proofFile = $submission->fileAttachments()->whereIn('file_type', ['JPG', 'JPEG', 'PNG'])->first();
+                    $img = $proofFile ? $proofFile->url : asset('images/harrystyles-proof1.png');
                   @endphp
 
-                  <a href="{{ route($routeName) }}"
+                  <a href="{{ route('student.submissions.show', $submission->id) }}"
                      class="group relative block rounded-2xl bg-white border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <div class="hover-glow absolute inset-0 pointer-events-none z-[1]"></div>
                     <article class="relative z-[2]">

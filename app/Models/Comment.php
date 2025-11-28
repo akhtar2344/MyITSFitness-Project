@@ -17,6 +17,7 @@ class Comment extends Model
     protected $fillable = [
         'submission_id',
         'body',
+        'content',
         'private',
         'student_id',
         'lecturer_id',
@@ -42,5 +43,20 @@ class Comment extends Model
     public function lecturer()
     {
         return $this->belongsTo(Lecturer::class, 'lecturer_id');
+    }
+
+    // Get the user who made the comment (either student or lecturer)
+    public function user()
+    {
+        if ($this->student_id) {
+            return $this->student()->first()?->user();
+        }
+        return $this->lecturer()->first()?->user();
+    }
+
+    // Accessor for comment text (handles both 'body' and 'content' fields)
+    public function getContentAttribute()
+    {
+        return $this->attributes['content'] ?? $this->attributes['body'] ?? '';
     }
 }

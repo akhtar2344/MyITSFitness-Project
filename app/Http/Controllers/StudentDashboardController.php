@@ -32,8 +32,12 @@ class StudentDashboardController extends Controller
         // Note: DB enum uses 'NeedRevision'
         $needRevisionCount = $student->submissions()->where('status', 'NeedRevision')->count();
 
-        // Recent submissions (latest 5)
-        $recentSubmissions = $student->submissions()->with('activity')->orderBy('created_at', 'desc')->take(5)->get();
+        // Recent submissions (latest 5) - include fileAttachments for displaying uploaded proof images
+        $recentSubmissions = $student->submissions()
+            ->with(['activity', 'fileAttachments'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
         return view('student.dashboard.dashboard', [
             'student' => $student,

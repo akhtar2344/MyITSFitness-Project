@@ -19,6 +19,8 @@ class RevisionRequest extends Model
         'submission_id',
         'lecturer_id',
         'message',
+        'reason',
+        'requested_by',
         'created_at',
         'resolved_at',
     ];
@@ -37,5 +39,10 @@ class RevisionRequest extends Model
     public function lecturer()
     {
         return $this->belongsTo(Lecturer::class, 'lecturer_id');
+    }
+
+    public function requestedByUser()
+    {
+        return $this->lecturer()?->first()?->user();
     }
 }

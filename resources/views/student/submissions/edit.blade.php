@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Edit & Resubmit | myITS Fitness</title>
 
   <!-- Tailwind CDN -->
@@ -43,6 +44,18 @@
       border-color: rgba(123,97,255,0.35);
       color: #111827;
     }
+
+    /* Snackbar animations */
+    @keyframes slideInSnackbar {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutSnackbar {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(400px); opacity: 0; }
+    }
+    .animate-slide-in { animation: slideInSnackbar 0.3s ease-in-out; }
+    .animate-slide-out { animation: slideOutSnackbar 0.3s ease-in-out; }
   </style>
 </head>
 
@@ -347,6 +360,34 @@
       });
     })();
 
+    // Snackbar notification system
+    function showSnackbar(message, type = 'info', duration = 5000) {
+      const container = document.getElementById('snackbarContainer') || createSnackbarContainer();
+      const snackbar = document.createElement('div');
+      snackbar.className = `p-4 rounded-lg text-white text-sm font-medium shadow-lg max-w-xs w-full animate-slide-in`;
+      
+      if (type === 'success') snackbar.classList.add('bg-green-500');
+      else if (type === 'error') snackbar.classList.add('bg-red-500');
+      else if (type === 'warning') snackbar.classList.add('bg-yellow-500');
+      else snackbar.classList.add('bg-blue-500');
+      
+      snackbar.textContent = message;
+      container.appendChild(snackbar);
+      
+      setTimeout(() => {
+        snackbar.classList.add('animate-slide-out');
+        setTimeout(() => snackbar.remove(), 300);
+      }, duration);
+    }
+
+    function createSnackbarContainer() {
+      const container = document.createElement('div');
+      container.id = 'snackbarContainer';
+      container.className = 'fixed bottom-4 right-4 space-y-2 z-50';
+      document.body.appendChild(container);
+      return container;
+    }
+
     // Modal logic
     const completeModal = document.getElementById('completeModal');
     const completeOverlay = document.getElementById('completeOverlay');
@@ -373,7 +414,64 @@
     submitBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (submitBtn.disabled) return;
+      
+      // Create FormData from form
+      const formData = new FormData();
+      formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+      
+      // Get activity name
+      const activityName = isOther 
+        ? (document.getElementById('activityTitle')?.value || '').trim()
+        : (document.getElementById('activityHidden')?.value || '').trim();
+      
+      formData.append('activity_name', activityName);
+      formData.append('date', dateEl?.value || '');
+      formData.append('duration', durEl?.value || '0');
+      formData.append('place', placeEl?.value || '');
+      
+      // Append proof image (required)
+      if (proofInput?.files?.[0]) {
+        formData.append('proof_image', proofInput.files[0]);
+      }
+      
+      // Append certificate image (optional)
+      if (certInput?.files?.[0]) {
+        formData.append('certificate_image', certInput.files[0]);
+      }
+      
+      // Open modal first
       openComplete();
+      
+      // Submit to server
+      fetch("{{ route('student.submissions.store') }}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Modal stays open, show success screen after delay
+          setTimeout(() => {
+            closeCompleteFn();
+            setTimeout(() => {
+              document.querySelector('main').classList.add('hidden');
+              document.getElementById('finalSuccess').classList.remove('hidden');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 220);
+          }, 2000); // Show modal for 2 seconds
+        } else {
+          // Close modal and show error
+          closeCompleteFn();
+          showSnackbar(data.message || 'Error submitting activity', 'error');
+        }
+      })
+      .catch(error => {
+        closeCompleteFn();
+        showSnackbar('Error submitting activity: ' + error.message, 'error');
+      });
     });
   </script>
 
