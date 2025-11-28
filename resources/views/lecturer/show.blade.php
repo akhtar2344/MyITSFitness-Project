@@ -66,7 +66,7 @@
             <span class="text-lg">‹</span> <span class="text-sm">Back to submissions</span>
           </button>
 
-          <h1 class="text-4xl font-extrabold tracking-tight">Harry Styles</h1>
+          <h1 class="text-4xl font-extrabold tracking-tight">{{ $submission->student->name ?? 'Student' }}</h1>
 
           <div class="mt-4 grid grid-cols-12 gap-6">
             <!-- Left card -->
@@ -79,37 +79,57 @@
                          alt="Student Avatar"
                          class="w-16 h-16 rounded-full object-cover border shadow-sm select-none">
                     <div>
-                      <div class="text-xl font-semibold">Harry Styles</div>
-                      <div class="text-slate-500 text-sm">NRP 5026231000</div>
+                      <div class="text-xl font-semibold">{{ $submission->student->name ?? 'N/A' }}</div>
+                      <div class="text-slate-500 text-sm">NRP {{ $submission->student->nrp ?? 'N/A' }}</div>
                     </div>
                   </div>
 
-                  <!-- ACTION BUTTONS: semua aktif (Pending state) -->
+                  <!-- ACTION BUTTONS: Always available to edit status -->
                   <div class="flex items-center gap-2.5">
                     <!-- Accept: GREEN solid -->
-                    <button
-                      class="inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px">
-                      Accept
-                    </button>
+                    <form method="POST" action="{{ route('lecturer.reviews.accept', $submission->id) }}" style="display:inline;">
+                      @csrf
+                      <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-colors">
+                        Accept
+                      </button>
+                    </form>
                     <!-- Reject: RED solid -->
-                    <button
-                      class="inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px">
-                      Reject
-                    </button>
+                    <form method="POST" action="{{ route('lecturer.reviews.reject', $submission->id) }}" style="display:inline;">
+                      @csrf
+                      <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-colors">
+                        Reject
+                      </button>
+                    </form>
                     <!-- Request Revision: ORANGE outline -->
-                    <button
-                      class="inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px">
-                      Request Revision
-                    </button>
+                    <form method="POST" action="{{ route('lecturer.reviews.requestRevision', $submission->id) }}" style="display:inline;">
+                      @csrf
+                      <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-colors">
+                        Request Revision
+                      </button>
+                    </form>
+                  </div>
+
+                  <!-- STATUS BADGE: Display current status for reference -->
+                  <div class="mt-4 inline-flex items-center gap-2">
+                    <span class="text-slate-500 text-sm">Current status:</span>
+                    @if ($submission->status === 'Accepted')
+                      <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm">✓ Accepted</span>
+                    @elseif ($submission->status === 'Rejected')
+                      <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-semibold text-sm">✕ Rejected</span>
+                    @elseif ($submission->status === 'NeedRevision')
+                      <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-semibold text-sm">⟲ Need Revision</span>
+                    @else
+                      <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm">⏳ Pending</span>
+                    @endif
                   </div>
                 </div>
 
                 <!-- Meta -->
                 <div class="mt-6 grid grid-cols-2 gap-y-3 text-sm md:text-base">
-                  <div class="text-slate-500">Submitted:</div><div class="font-medium">November 2, 2024</div>
-                  <div class="text-slate-500">Activity:</div><div class="font-medium">Running</div>
-                  <div class="text-slate-500">Location:</div><div class="font-medium">KONI</div>
-                  <div class="text-slate-500">Duration:</div><div class="font-medium">1,5 Hours</div>
+                  <div class="text-slate-500">Submitted:</div><div class="font-medium">{{ $submission->created_at->format('M d, Y') }}</div>
+                  <div class="text-slate-500">Activity:</div><div class="font-medium">{{ $submission->activity->name ?? 'N/A' }}</div>
+                  <div class="text-slate-500">Location:</div><div class="font-medium">{{ $submission->activity->location ?? 'N/A' }}</div>
+                  <div class="text-slate-500">Duration:</div><div class="font-medium">{{ $submission->activity->duration ?? 'N/A' }} Hours</div>
                 </div>
 
                 <hr class="my-6">
@@ -118,11 +138,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <div class="font-semibold mb-3">Proof</div>
-                    <img
-                      src="{{ asset('images/harrystyles-proof3.png') }}"
-                      alt="Harry Proof"
-                      class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl object-cover border shadow-sm"
-                    />
+                    @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
+                      <img
+                        src="{{ $submission->fileAttachments->first()->url }}"
+                        alt="Proof"
+                        class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl object-cover border shadow-sm"
+                      />
+                    @else
+                      <div class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl border bg-slate-100/70 flex items-center justify-center text-slate-500">
+                        No proof uploaded
+                      </div>
+                    @endif
                   </div>
                   <div>
                     <div class="font-semibold mb-3">Attachment</div>
@@ -140,21 +166,26 @@
               </div>
 
               <div class="mt-4 space-y-4 flex-1 overflow-y-auto pr-1">
-                <div class="flex items-start gap-3">
-                  <img
-                    src="{{ asset('images/heru susanto.png') }}"
-                    alt="Heru Susanto"
-                    class="w-9 h-9 rounded-full object-cover border shadow-sm shrink-0"
-                  />
-                  <div>
-                    <div class="font-medium">Heru Susanto</div>
-                    <div class="text-slate-600 text-sm">Excellent work Harry!</div>
+                @forelse ($comments as $comment)
+                  <div class="flex items-start gap-3">
+                    <img
+                      src="{{ asset('images/lecturer.png') }}"
+                      alt="{{ $comment->user->name ?? 'User' }}"
+                      class="w-9 h-9 rounded-full object-cover border shadow-sm shrink-0"
+                    />
+                    <div>
+                      <div class="font-medium">{{ $comment->user->name ?? 'Unknown' }}</div>
+                      <div class="text-slate-600 text-sm">{{ $comment->text }}</div>
+                    </div>
                   </div>
-                </div>
+                @empty
+                  <div class="text-sm text-slate-500 text-center py-4">No comments yet</div>
+                @endforelse
               </div>
 
               <div class="pt-4 mt-4 border-t">
                 <form id="commentForm" class="flex items-center gap-3">
+                  @csrf
                   <input
                     id="commentInput"
                     type="text"

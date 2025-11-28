@@ -4,8 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShowController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\LecturerDashboardController;
+use App\Http\Controllers\SubmissionDetailController;
+use App\Http\Controllers\Lecturer\SubmissionReviewController;
 use App\Http\Controllers\Student\SubmissionManagementController;
-use App\Http\Controllers\Student\SubmissionDetailController;
+use App\Http\Controllers\Student\SubmissionDetailController as StudentSubmissionDetailController;
 use App\Http\Controllers\Student\StatusPageController;
 use App\Models\Comment;
 
@@ -36,7 +39,7 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::get('/status', [StatusPageController::class, 'index'])->name('status');
 
     // ===== Submission Detail Page (Dynamic) =====
-    Route::get('/submissions/{submission}/view', [SubmissionDetailController::class, 'show'])->name('submissions.show');
+    Route::get('/submissions/{submission}/view', [StudentSubmissionDetailController::class, 'show'])->name('submissions.show');
 
     // ===== Activity Details (Mock Harry - static views) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
@@ -75,8 +78,8 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     // Halaman “root” lecturer (kalau ada landing khusus)
     Route::view('/', 'lecturer.index')->name('index');
 
-    // Dashboard lecturer
-    Route::view('/dashboard', 'lecturer.dashboard.dashboard')->name('dashboard');
+    // Dashboard lecturer - now with real data from controller
+    Route::get('/dashboard', [LecturerDashboardController::class, 'index'])->name('dashboard');
 
     // ===== Students List & Detail ===== Ahmad Faiz Ramdhani
     // List students -> resources/views/lecturer/index.blade.php
@@ -84,12 +87,8 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
         return view('lecturer.index');
     })->name('students.index');
 
-     // Detail student -> resources/views/lecturer/show.blade.php
-    Route::get('/students/{id}', function (string $id) {
-        // Jika show.blade.php kamu masih static, ini tetap aman.
-        // Kalau nanti mau dinamis, tinggal lempar data di sini.
-        return view('lecturer.show', compact('id'));
-    })->name('students.show');
+     // Detail submission -> resources/views/lecturer/show.blade.php
+    Route::get('/submissions/{submission}', [SubmissionDetailController::class, 'show'])->name('submissions.show');
 
      /* ====== NEW: Lecturer Status Account (untuk halaman seperti figma) ====== */
     Route::get('/status/{id}', function (string $id) {
@@ -118,24 +117,15 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
 });
 
 /* -------------------------------------------------------------
-| LECTURER REVIEWS (List + Action Dummies) - Marvello Adipertama
+| LECTURER REVIEWS (List + Action) - Marvello Adipertama
 |--------------------------------------------------------------*/
 Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () {
-    Route::view('/', 'lecturer.reviews.sublec')->name('index');
-    Route::view('/sublec', 'lecturer.reviews.sublec')->name('sublec');
+    Route::get('/', [SubmissionReviewController::class, 'index'])->name('index');
+    Route::get('/sublec', [SubmissionReviewController::class, 'index'])->name('sublec');
 
-    Route::post('/{submission}/accept', function ($submission) {
-        return back()->with('ok', "Submission {$submission} accepted");
-    })->name('accept');
-
-    Route::post('/{submission}/reject', function ($submission) {
-        return back()->with('ok', "Submission {$submission} rejected");
-    })->name('reject');
-
-    Route::post('/{submission}/request-revision', function ($submission) {
-        return back()->with('ok', "Revision requested for {$submission}");
-    })->name('requestRevision');
-
+    Route::post('/{submission}/accept', [SubmissionDetailController::class, 'accept'])->name('accept');
+    Route::post('/{submission}/reject', [SubmissionDetailController::class, 'reject'])->name('reject');
+    Route::post('/{submission}/request-revision', [SubmissionDetailController::class, 'requestRevision'])->name('requestRevision');
     Route::post('/{submission}/comment', function ($submission) {
         return back()->with('ok', "Comment sent for {$submission}");
     })->name('comment');

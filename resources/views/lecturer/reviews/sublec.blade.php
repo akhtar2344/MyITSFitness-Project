@@ -103,46 +103,43 @@
                   </tr>
                 </thead>
                 <tbody id="submissionTable" class="text-slate-800">
-                  @php
-                    $rows = [
-                      ['name' => 'Harry Styles', 'nrp' => '5026231000', 'activity' => 'Running', 'details' => '1,5 Hours', 'submitted' => 'Nov 2, 2024', 'proof' => asset('images/harrystyles-procon.png'), 'attachment' => 'certificate5krun.pdf', 'status' => 'Pending'],
-                      ['name' => 'Hiddleston', 'nrp' => '5026231001', 'activity' => 'Soccer', 'details' => '2 Hours', 'submitted' => 'Nov 3, 2024', 'proof' => asset('images/hiddleston-procon.png'), 'attachment' => 'juara1CLeague.jpg', 'status' => 'Pending'],
-                      ['name' => 'A.Taylor', 'nrp' => '5026231002', 'activity' => 'Chess', 'details' => '30 Minutes', 'submitted' => 'Nov 3, 2024', 'proof' => asset('images/a.taylor-procon.png'), 'attachment' => 'juaracaturkeputih.png', 'status' => 'Need Revision'],
-                      ['name' => 'S.Ohtani', 'nrp' => '5026231003', 'activity' => 'Baseball', 'details' => '1 Hours', 'submitted' => 'Dec 5, 2024', 'proof' => asset('images/s.ohtani-procon.png'), 'attachment' => 'quarterfinperbasi.pdf', 'status' => 'Accepted'],
-                      ['name' => 'S.Curry', 'nrp' => '5026231004', 'activity' => 'Basketball', 'details' => '1 Hours', 'submitted' => 'Dec 6, 2024', 'proof' => asset('images/s.curry-procon.png'), 'attachment' => 'runnerup.png', 'status' => 'Accepted'],
-                      ['name' => 'Benedict', 'nrp' => '5026231006', 'activity' => 'Running', 'details' => '2 Hours', 'submitted' => 'Dec 11, 2024', 'proof' => asset('images/benedict-procon.png'), 'attachment' => 'bukitstrava.jpg', 'status' => 'Accepted'],
-                      ['name' => 'V.Beckham', 'nrp' => '5026231007', 'activity' => 'Gym', 'details' => '1,5 Hours', 'submitted' => 'Dec 11, 2024', 'proof' => asset('images/v.beckham-procon.png'), 'attachment' => 'gymphoto3.jpeg', 'status' => 'Accepted'],
-                      ['name' => 'K.Middleton', 'nrp' => '5026231005', 'activity' => 'Tennis', 'details' => '1 Hours', 'submitted' => 'Dec 10, 2024', 'proof' => asset('images/m.middleton-procon.png'), 'attachment' => 'sertifjuara.jpeg', 'status' => 'Rejected'],
-                    ];
-                  @endphp
-
-                  @foreach ($rows as $i => $r)
+                  @forelse ($submissions as $i => $submission)
                     <tr
                       class="row-item row-like-find {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }} hover:bg-slate-50 transition-colors"
-                      data-status="{{ $r['status'] }}">
+                      data-status="{{ $submission->status }}">
                       <td class="px-8 py-5 align-middle">
-                        <a href="{{ route('lecturer.show') }}" class="block w-fit">
-                          <div class="h-grad font-semibold text-slate-900">{{ $r['name'] }}</div>
-                          <div class="h-grad text-slate-500 text-sm">{{ $r['nrp'] }}</div>
+                        <a href="{{ route('lecturer.submissions.show', $submission->id) }}" class="block w-fit">
+                          <div class="h-grad font-semibold text-slate-900">{{ $submission->student->name ?? 'N/A' }}</div>
+                          <div class="h-grad text-slate-500 text-sm">{{ $submission->student->nrp ?? 'N/A' }}</div>
                         </a>
                       </td>
-                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $r['activity'] }}</span>
+                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->activity->name ?? 'N/A' }}</span>
                       </td>
-                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $r['details'] }}</span>
+                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->duration ?? 'N/A' }} Hours</span>
                       </td>
-                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $r['submitted'] }}</span>
+                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->created_at->format('M d, Y') }}</span>
                       </td>
 
                       <!-- Proof: HANYA FOTO, tanpa frame/border/shadow/oval -->
                       <td class="px-8 py-5 align-middle">
-                        <img src="{{ $r['proof'] }}" alt="proof" class="proof-avatar">
+                        @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
+                          <img src="{{ $submission->fileAttachments->first()->url }}" alt="proof" class="proof-avatar">
+                        @else
+                          <span class="text-slate-400 text-sm">No proof</span>
+                        @endif
                       </td>
 
                       <td class="px-8 py-5 align-middle">
-                        <span class="h-grad text-slate-700">{{ $r['attachment'] }}</span>
+                        <span class="h-grad text-slate-700">{{ $submission->fileAttachments->first()->file_name ?? 'N/A' }}</span>
                       </td>
                     </tr>
-                  @endforeach
+                  @empty
+                    <tr class="bg-slate-50">
+                      <td colspan="6" class="px-8 py-12 text-center text-slate-500">
+                        No submissions found
+                      </td>
+                    </tr>
+                  @endforelse
 
                 </tbody>
               </table>
@@ -188,21 +185,18 @@
       el.classList.remove('text-slate-600');
     }
 
-    function filterRows(status) {
-      rows.forEach(r => {
-        const s = r.getAttribute('data-status');
-        r.style.display = (status === 'All' || s === status) ? '' : 'none';
-      });
-    }
-
-    // init
-    setActive('All');
-    filterRows('All');
+    // Get current filter from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentFilter = urlParams.get('status') || 'All';
+    setActive(currentFilter);
 
     tabs.forEach(b => b.addEventListener('click', () => {
-      const s = b.dataset.status;
-      setActive(s);
-      filterRows(s);
+      const status = b.dataset.status;
+      // Navigate with query parameter
+      const url = status === 'All' 
+        ? window.location.pathname 
+        : window.location.pathname + '?status=' + encodeURIComponent(status);
+      window.location.href = url;
     }));
   </script>
 
