@@ -39,6 +39,26 @@ class SubmissionDetailController extends Controller
             ->where('file_type', 'PDF')
             ->first();
 
+        // Generate proper proof image URL
+        $proofImage = '';
+        if ($proofFile && $proofFile->url) {
+            $proofUrl = $proofFile->url;
+            // If URL starts with /storage/ or storage/, it's already a valid public URL
+            if (strpos($proofUrl, '/storage/') === 0 || strpos($proofUrl, 'storage/') === 0) {
+                $proofImage = $proofUrl;
+            } elseif (strpos($proofUrl, 'submissions/') === 0) {
+                // If it's just the path, prepend /storage/
+                $proofImage = '/storage/' . $proofUrl;
+            } else {
+                // For other cases, try to generate via Storage::url()
+                $url = ltrim($proofUrl, '/');
+                if (strpos($url, 'public/') === 0) {
+                    $url = substr($url, 7);
+                }
+                $proofImage = \Illuminate\Support\Facades\Storage::disk('public')->url($url);
+            }
+        }
+
         // Load user relationships for comments (for display purposes)
         $comments = $submission->comments->map(function($comment) {
             if ($comment->student_id) {
@@ -66,7 +86,7 @@ class SubmissionDetailController extends Controller
             'activity' => $submission->activity,
             'student' => $student,
             'proofFile' => $proofFile,
-            'proofImage' => $proofFile ? $proofFile->url : asset('images/placeholder.png'),
+            'proofImage' => $proofImage ?: asset('images/placeholder.png'),
             'certificateFile' => $certificateFile,
             'revisionRequests' => $submission->revisionRequests,
             'comments' => $comments,

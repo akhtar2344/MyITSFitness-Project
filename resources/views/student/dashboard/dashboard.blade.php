@@ -183,7 +183,16 @@
 
                     // Get proof image from FileAttachment (FIXED: use actual uploaded image)
                     $proofFile = $submission->fileAttachments()->whereIn('file_type', ['JPG', 'JPEG', 'PNG'])->first();
-                    $img = $proofFile ? $proofFile->url : asset('images/harrystyles-proof1.png');
+                    $proofUrl = null;
+                    if ($proofFile && $proofFile->url) {
+                      // Convert database path to public URL
+                      if (strpos($proofFile->url, 'submissions/') === 0) {
+                        $proofUrl = '/storage/' . $proofFile->url;
+                      } else {
+                        $proofUrl = $proofFile->url;
+                      }
+                    }
+                    $img = $proofUrl ?: asset('images/harrystyles-proof1.png');
                   @endphp
 
                   <a href="{{ route('student.submissions.show', $submission->id) }}"
