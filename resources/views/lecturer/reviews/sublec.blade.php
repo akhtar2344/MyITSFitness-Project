@@ -115,7 +115,7 @@
                       </td>
                       <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->activity->name ?? 'N/A' }}</span>
                       </td>
-                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->duration ?? 'N/A' }} Hours</span>
+                      <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ round(($submission->duration_minutes ?? 0) / 60, 2) }} Hours</span>
                       </td>
                       <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->created_at->format('M d, Y') }}</span>
                       </td>

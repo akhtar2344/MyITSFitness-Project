@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use App\Models\Activity;
 use App\Models\Student;
+use App\Models\Lecturer;
 use App\Models\FileAttachment;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Storage;
@@ -213,19 +214,31 @@ class SubmissionManagementController extends Controller
      */
     public function storeComment(Submission $submission, Request $request)
     {
-        // Get current logged-in student
-        $studentId = session('user_id');
+        // Get current logged-in user
+        $userId = session('user_id');
         
-        if (!$studentId) {
+        if (!$userId) {
             return response()->json(['success' => false, 'message' => 'Please login first'], 401);
         }
 
-        // Get student record
-        $student = Student::where('user_id', $studentId)->firstOrFail();
+        // Try to get student record
+        $student = Student::where('user_id', $userId)->first();
+        $lecturer = null;
+        $userName = null;
 
-        // Check if submission belongs to logged-in student
-        if ($submission->student_id !== $student->id) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        if ($student) {
+            // Student commenting - check if submission belongs to them
+            if ($submission->student_id !== $student->id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            $userName = $student->name;
+        } else {
+            // Try to get lecturer record
+            $lecturer = \App\Models\Lecturer::where('user_id', $userId)->first();
+            if (!$lecturer) {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+            $userName = $lecturer->name;
         }
 
         // Validate comment
@@ -236,7 +249,8 @@ class SubmissionManagementController extends Controller
         try {
             // Create comment
             $comment = $submission->comments()->create([
-                'student_id' => $student->id,
+                'student_id' => $student?->id,
+                'lecturer_id' => $lecturer?->id,
                 'body' => $validated['content'],
             ]);
 
@@ -245,7 +259,7 @@ class SubmissionManagementController extends Controller
                 'message' => 'Comment added successfully',
                 'comment' => [
                     'id' => $comment->id,
-                    'name' => $student->name,
+                    'name' => $userName,
                     'content' => $comment->body,
                     'created_at' => $comment->created_at->format('M j, Y \a\t g:i A'),
                 ]
@@ -265,19 +279,32 @@ class SubmissionManagementController extends Controller
      */
     public function deleteComment(Comment $comment)
     {
-        // Get current logged-in student
-        $studentId = session('user_id');
+        // Get current logged-in user
+        $userId = session('user_id');
         
-        if (!$studentId) {
+        if (!$userId) {
             return response()->json(['success' => false, 'message' => 'Please login first'], 401);
         }
 
-        // Get student record
-        $student = Student::where('user_id', $studentId)->firstOrFail();
+        // Try to get student record
+        $student = Student::where('user_id', $userId)->first();
+        $lecturer = null;
 
-        // Check if comment belongs to logged-in student
-        if ($comment->student_id !== $student->id) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        if ($student) {
+            // Student deleting - check if comment belongs to them
+            if ($comment->student_id !== $student->id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+        } else {
+            // Try to get lecturer record
+            $lecturer = Lecturer::where('user_id', $userId)->first();
+            if (!$lecturer) {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+            // Lecturer deleting - check if comment belongs to them
+            if ($comment->lecturer_id !== $lecturer->id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
         }
 
         try {
