@@ -129,7 +129,7 @@
                   <div class="text-slate-500">Submitted:</div><div class="font-medium">{{ $submission->created_at->format('M d, Y') }}</div>
                   <div class="text-slate-500">Activity:</div><div class="font-medium">{{ $submission->activity->name ?? 'N/A' }}</div>
                   <div class="text-slate-500">Location:</div><div class="font-medium">{{ $submission->activity->location ?? 'N/A' }}</div>
-                  <div class="text-slate-500">Duration:</div><div class="font-medium">{{ $submission->activity->duration ?? 'N/A' }} Hours</div>
+                  <div class="text-slate-500">Duration:</div><div class="font-medium">{{ round(($submission->duration_minutes ?? 0) / 60, 2) }} Hours</div>
                 </div>
 
                 <hr class="my-6">
@@ -165,21 +165,30 @@
                 <span>Private Comments</span>
               </div>
 
-              <div class="mt-4 space-y-4 flex-1 overflow-y-auto pr-1">
+              <div class="mt-4 flex-1 overflow-y-auto space-y-4 pr-1">
                 @forelse ($comments as $comment)
-                  <div class="flex items-start gap-3">
+                  <div class="flex items-start gap-3 group" data-comment-id="{{ $comment->id }}">
                     <img
-                      src="{{ asset('images/lecturer.png') }}"
-                      alt="{{ $comment->user->name ?? 'User' }}"
+                      src="{{ asset('images/icon-user.png') }}"
+                      alt="User"
                       class="w-9 h-9 rounded-full object-cover border shadow-sm shrink-0"
                     />
-                    <div>
-                      <div class="font-medium">{{ $comment->user->name ?? 'Unknown' }}</div>
-                      <div class="text-slate-600 text-sm">{{ $comment->text }}</div>
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 justify-between">
+                        <div>
+                          <div class="font-medium">{{ $comment->student->name ?? $comment->lecturer->name ?? 'Unknown' }}</div>
+                          <div class="text-slate-400 text-xs">{{ $comment->created_at->format('M j, Y \a\t g:i A') }}</div>
+                        </div>
+                        <button class="delete-comment-btn text-slate-400 hover:text-red-500 transition-colors text-xl leading-none flex-shrink-0" 
+                                data-comment-id="{{ $comment->id }}" title="Delete comment">
+                          ⋮
+                        </button>
+                      </div>
+                      <div class="text-slate-600 text-sm mt-1">{{ $comment->content ?? $comment->body ?? '—' }}</div>
                     </div>
                   </div>
                 @empty
-                  <div class="text-sm text-slate-500 text-center py-4">No comments yet</div>
+                  <div class="text-center text-slate-400 text-sm py-8">No comments yet</div>
                 @endforelse
               </div>
 
@@ -232,16 +241,135 @@
       const input = document.getElementById('commentInput');
       const btn = document.getElementById('sendBtn');
       const form = document.getElementById('commentForm');
+      const commentsContainer = document.querySelector('.mt-4.flex-1.overflow-y-auto.space-y-4.pr-1');
+
       function updateState() { btn.disabled = !input.value.trim(); }
+
       input.addEventListener('input', updateState);
-      form.addEventListener('submit', function(e){
+      form.addEventListener('submit', async function(e) {
         e.preventDefault();
         if (!input.value.trim()) return;
+        
+        const comment = input.value.trim();
         btn.classList.add('scale-95');
-        setTimeout(()=>btn.classList.remove('scale-95'),150);
-        input.value = '';
-        updateState();
+        btn.disabled = true;
+
+        try {
+          const response = await fetch('{{ route("student.submissions.comment", $submission->id) }}', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: comment })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Remove "No comments yet" message if exists
+            const noComments = commentsContainer.querySelector('.text-center.text-slate-400');
+            if (noComments) noComments.remove();
+
+            // Add new comment to container (use server-formatted date)
+            const commentHTML = `
+              <div class="flex items-start gap-3 group" data-comment-id="${data.comment.id}">
+                <img
+                  src="{{ asset('images/icon-user.png') }}"
+                  alt="User"
+                  class="w-9 h-9 rounded-full object-cover border shadow-sm shrink-0"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 justify-between">
+                    <div>
+                      <div class="font-medium">${data.comment.name}</div>
+                      <div class="text-slate-400 text-xs">${data.comment.created_at}</div>
+                    </div>
+                    <button class="delete-comment-btn text-slate-400 hover:text-red-500 transition-colors text-xl leading-none flex-shrink-0" 
+                            data-comment-id="${data.comment.id}" title="Delete comment">
+                      ⋮
+                    </button>
+                  </div>
+                  <div class="text-slate-600 text-sm mt-1">${data.comment.content}</div>
+                </div>
+              </div>
+            `;
+            commentsContainer.insertAdjacentHTML('beforeend', commentHTML);
+            
+            input.value = '';
+            updateState();
+          } else {
+            alert('Error: ' + (data.message || 'Failed to add comment'));
+          }
+        } catch (error) {
+          alert('Network error: ' + error.message);
+        } finally {
+          btn.classList.remove('scale-95');
+          btn.disabled = false;
+        }
       });
+
+      // Handle delete comment
+      commentsContainer.addEventListener('click', async (e) => {
+        if (!e.target.classList.contains('delete-comment-btn')) return;
+        
+        const commentId = e.target.dataset.commentId;
+        if (!commentId) return;
+
+        // Custom confirmation dialog
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+          <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-4">
+            <h3 class="text-lg font-semibold mb-4">Delete this comment?</h3>
+            <div class="flex gap-3 justify-end">
+              <button class="cancel-btn px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 font-medium">Cancel</button>
+              <button class="confirm-btn px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Delete</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.querySelector('.cancel-btn').addEventListener('click', () => {
+          modal.remove();
+        });
+
+        modal.querySelector('.confirm-btn').addEventListener('click', async () => {
+          modal.remove();
+
+          try {
+            const response = await fetch('{{ route("student.comments.delete", ":id") }}'.replace(':id', commentId), {
+              method: 'DELETE',
+              headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+              }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              // Remove comment from DOM
+              const commentEl = commentsContainer.querySelector(`[data-comment-id="${commentId}"]`);
+              if (commentEl) {
+                commentEl.remove();
+                
+                // Show "No comments yet" if no comments remain
+                if (commentsContainer.children.length === 0) {
+                  commentsContainer.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">No comments yet</div>';
+                }
+              }
+            } else {
+              alert('Error: ' + (data.message || 'Failed to delete comment'));
+            }
+          } catch (error) {
+            alert('Network error: ' + error.message);
+          }
+        });
+      });
+
       updateState();
     })();
   </script>
