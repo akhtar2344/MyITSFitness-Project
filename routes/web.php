@@ -66,6 +66,8 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::get('/submissions/edit', [SubmissionManagementController::class, 'edit'])->name('submissions.edit');
     Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
     Route::post('/submissions/{submission}/cancel', [SubmissionManagementController::class, 'cancel'])->name('submissions.cancel');
+    Route::get('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'showResubmit'])->name('submissions.resubmit');
+    Route::post('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'storeResubmit'])->name('submissions.resubmitStore');
     Route::post('/submissions/{submission}/comment', [SubmissionManagementController::class, 'storeComment'])->name('submissions.comment');
     Route::delete('/comments/{comment}', [SubmissionManagementController::class, 'deleteComment'])->where('comment', '[a-f0-9\\-]+')->name('comments.delete');
     Route::get('/{id}', [ShowController::class, 'show'])->name('show');

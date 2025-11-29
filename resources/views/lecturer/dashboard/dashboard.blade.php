@@ -379,7 +379,13 @@
                       </td>
                       <td class="px-8 py-5 align-middle">
                         @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
-                          <img src="{{ $submission->fileAttachments->first()->url }}" alt="proof" class="w-8 h-8 rounded-full object-cover border shadow-sm">
+                          @php
+                            $proofUrl = $submission->fileAttachments->first()->url;
+                            if (strpos($proofUrl, 'submissions/') === 0) {
+                              $proofUrl = '/storage/' . $proofUrl;
+                            }
+                          @endphp
+                          <img src="{{ $proofUrl }}" alt="proof" class="w-8 h-8 rounded-full object-cover border shadow-sm">
                         @else
                           <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-500">N/A</div>
                         @endif

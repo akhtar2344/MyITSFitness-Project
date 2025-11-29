@@ -96,13 +96,12 @@
                     <span class="inline-flex items-center h-10 px-4 rounded-2xl text-white font-semibold bg-amber-500">
                       {{ $submission->status }}
                     </span>
-                    <button type="button"
-                            id="resubmitBtn"
-                            class="h-10 px-5 rounded-lg border border-indigo-400 text-indigo-600 font-semibold bg-white
-                                   hover:bg-indigo-50 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200
-                                   active:translate-y-px transition-colors">
+                    <a href="{{ route('student.submissions.resubmit', $submission->id) }}"
+                       class="h-10 px-5 rounded-lg border border-indigo-400 text-indigo-600 font-semibold bg-white
+                              hover:bg-indigo-50 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200
+                              active:translate-y-px transition-colors inline-flex items-center">
                       Resubmit
-                    </button>
+                    </a>
                   </div>
                 </div>
 
@@ -227,16 +226,6 @@
       document.addEventListener('keydown', function(e){
         if (e.key === 'Escape') overlay.classList.add('hidden');
       });
-    })();
-
-    // Resubmit button
-    (function () {
-      const resubmitBtn = document.getElementById('resubmitBtn');
-      if (resubmitBtn) {
-        resubmitBtn.addEventListener('click', () => {
-          window.location.href = "{{ route('student.submit') }}";
-        });
-      }
     })();
 
     // Interaktif Send Button

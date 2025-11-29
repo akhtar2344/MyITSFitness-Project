@@ -123,7 +123,13 @@
                       <!-- Proof: HANYA FOTO, tanpa frame/border/shadow/oval -->
                       <td class="px-8 py-5 align-middle">
                         @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
-                          <img src="{{ $submission->fileAttachments->first()->url }}" alt="proof" class="proof-avatar">
+                          @php
+                            $proofUrl = $submission->fileAttachments->first()->url;
+                            if (strpos($proofUrl, 'submissions/') === 0) {
+                              $proofUrl = '/storage/' . $proofUrl;
+                            }
+                          @endphp
+                          <img src="{{ $proofUrl }}" alt="proof" class="proof-avatar">
                         @else
                           <span class="text-slate-400 text-sm">No proof</span>
                         @endif

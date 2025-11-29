@@ -295,4 +295,199 @@ class SubmissionManagementController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Show resubmit form for a submission with NeedRevision status
+     */
+    public function showResubmit(Submission $submission)
+    {
+        // Check that submission belongs to current student
+        $studentId = session('user_id');
+        if (!$studentId) {
+            return redirect()->route('login')->with('error', 'Please login first');
+        }
+
+        $student = Student::where('user_id', $studentId)->firstOrFail();
+        
+        if ($submission->student_id !== $student->id) {
+            return redirect()->route('student.status')->with('error', 'Unauthorized access');
+        }
+
+        if ($submission->status !== 'NeedRevision') {
+            return redirect()->route('student.status')->with('error', 'Only submissions with "Need Revision" status can be resubmitted');
+        }
+
+        // Get activity and file data
+        $activity = $submission->activity;
+        $fileAttachments = $submission->fileAttachments;
+        
+        // Get proof image (first file in submission)
+        $proofFile = null;
+        $proofUrl = null;
+        if ($fileAttachments && count($fileAttachments) > 0) {
+            $proofFile = $fileAttachments[0]; // First file is proof
+            $proofUrl = $proofFile->url;
+        }
+        
+        // Generate full URL for proof image
+        // URL can be: '/storage/...' or 'submissions/...' or full path
+        $proofImage = '';
+        if ($proofUrl) {
+            // If URL starts with /storage/ or storage/, it's already a valid public URL
+            if (strpos($proofUrl, '/storage/') === 0 || strpos($proofUrl, 'storage/') === 0) {
+                $proofImage = $proofUrl;
+            } elseif (strpos($proofUrl, 'submissions/') === 0) {
+                // If it's just the path, prepend /storage/
+                $proofImage = '/storage/' . $proofUrl;
+            } else {
+                // For other cases, try to generate via Storage::url()
+                $url = ltrim($proofUrl, '/');
+                if (strpos($url, 'public/') === 0) {
+                    $url = substr($url, 7);
+                }
+                $proofImage = Storage::disk('public')->url($url);
+            }
+        }
+        
+        // Get certificate/membership (second file if exists)
+        $certificateFile = null;
+        if ($fileAttachments && count($fileAttachments) > 1) {
+            $certificateFile = $fileAttachments[1]; // Second file is certificate
+        }
+
+        return view('student.submissions.resubmit', compact(
+            'submission',
+            'activity',
+            'proofImage',
+            'proofFile',
+            'certificateFile'
+        ));
+    }
+
+    /**
+     * Store resubmission
+     */
+    public function storeResubmit(Request $request, Submission $submission)
+    {
+        // Check authentication and authorization
+        $studentId = session('user_id');
+        if (!$studentId) {
+            return response()->json(['success' => false, 'message' => 'Please login first'], 401);
+        }
+
+        $student = Student::where('user_id', $studentId)->firstOrFail();
+        
+        if ($submission->student_id !== $student->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        if ($submission->status !== 'NeedRevision') {
+            return response()->json(['success' => false, 'message' => 'Cannot resubmit this submission'], 400);
+        }
+
+        // Validate request
+        try {
+            $validated = $request->validate([
+                'proof_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+                'certificate_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        }
+
+        try {
+            // Handle proof image (optional - only update if new one provided)
+            if ($request->hasFile('proof_image')) {
+                // Delete old proof - look for first JPG/PNG/JPEG file (proof should be first)
+                $oldProof = $submission->fileAttachments
+                    ->whereIn('file_type', ['JPG', 'PNG', 'JPEG', 'jpg', 'png', 'jpeg'])
+                    ->first();
+                if ($oldProof) {
+                    Storage::disk('public')->delete($oldProof->url);
+                    $oldProof->delete();
+                }
+
+                // Upload new proof
+                $proofFile = $request->file('proof_image');
+                $extension = strtoupper($proofFile->getClientOriginalExtension());
+                $proofPath = 'submissions/' . Str::uuid() . '-' . time() . '.' . $extension;
+                Storage::disk('public')->put($proofPath, file_get_contents($proofFile));
+
+                $fileSizeBytes = $proofFile->getSize();
+                $fileSizeMB = round($fileSizeBytes / (1024 * 1024), 2);
+
+                FileAttachment::create([
+                    'submission_id' => $submission->id,
+                    'file_type' => $extension,
+                    'file_name' => $proofFile->getClientOriginalName(),
+                    'url' => $proofPath,
+                    'size_mb' => $fileSizeMB,
+                ]);
+            }
+            // If no new proof uploaded, old proof is automatically preserved
+
+            // Handle certificate image (optional - only update if new one provided)
+            if ($request->hasFile('certificate_image')) {
+                // Delete old certificate - look for second image or manually marked certificate
+                // Since we don't have explicit 'certificate' type, we'll just delete any old cert
+                // by checking if there's more than one file after proof
+                $files = $submission->fileAttachments
+                    ->whereIn('file_type', ['JPG', 'PNG', 'JPEG', 'jpg', 'png', 'jpeg'])
+                    ->get();
+                
+                // If there are 2+ files, the last one should be certificate
+                if ($files->count() > 1) {
+                    $oldCert = $files->last();
+                    Storage::disk('public')->delete($oldCert->url);
+                    $oldCert->delete();
+                }
+
+                // Upload new certificate
+                $certFile = $request->file('certificate_image');
+                $extension = strtoupper($certFile->getClientOriginalExtension());
+                $certPath = 'submissions/' . Str::uuid() . '-' . time() . '.' . $extension;
+                Storage::disk('public')->put($certPath, file_get_contents($certFile));
+
+                $fileSizeBytes = $certFile->getSize();
+                $fileSizeMB = round($fileSizeBytes / (1024 * 1024), 2);
+                FileAttachment::create([
+                    'submission_id' => $submission->id,
+                    'file_type' => $extension,
+                    'file_name' => $certFile->getClientOriginalName(),
+                    'url' => $certPath,
+                    'size_mb' => $fileSizeMB,
+                ]);
+            }
+            // If no new cert uploaded, old cert is automatically preserved
+
+            // Update submission status back to Pending
+            $submission->update([
+                'status' => 'Pending',
+                'updated_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Resubmission successful! Your submission has been updated.',
+                'redirect' => route('student.status'),
+            ]);
+
+        } catch (\Exception $e) {
+            $errorMsg = $e->getMessage();
+            \Log::error('Resubmit error', [
+                'submission_id' => $submission->id,
+                'error' => $errorMsg,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $errorMsg,
+            ], 500);
+        }
+    }
 }
