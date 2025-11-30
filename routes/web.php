@@ -7,6 +7,8 @@ use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\LecturerDashboardController;
 use App\Http\Controllers\SubmissionDetailController;
 use App\Http\Controllers\Lecturer\SubmissionReviewController;
+use App\Http\Controllers\Lecturer\StudentListController;
+use App\Http\Controllers\Lecturer\StudentStatusController;
 use App\Http\Controllers\Student\SubmissionManagementController;
 use App\Http\Controllers\Student\SubmissionDetailController as StudentSubmissionDetailController;
 use App\Http\Controllers\Student\StatusPageController;
@@ -77,25 +79,21 @@ Route::prefix('student')->name('student.')->group(function () {
 | LECTURER SECTION
 |--------------------------------------------------------------*/
 Route::prefix('lecturer')->name('lecturer.')->group(function () {
-    // Halaman “root” lecturer (kalau ada landing khusus)
-    Route::view('/', 'lecturer.index')->name('index');
+    // Halaman "root" lecturer (now uses controller to pass data)
+    Route::get('/', [StudentListController::class, 'index'])->name('index');
 
     // Dashboard lecturer - now with real data from controller
     Route::get('/dashboard', [LecturerDashboardController::class, 'index'])->name('dashboard');
 
     // ===== Students List & Detail ===== Ahmad Faiz Ramdhani
     // List students -> resources/views/lecturer/index.blade.php
-    Route::get('/students', function () {
-        return view('lecturer.index');
-    })->name('students.index');
+    Route::get('/students', [StudentListController::class, 'index'])->name('students.index');
 
      // Detail submission -> resources/views/lecturer/show.blade.php
     Route::get('/submissions/{submission}', [SubmissionDetailController::class, 'show'])->name('submissions.show');
 
      /* ====== NEW: Lecturer Status Account (untuk halaman seperti figma) ====== */
-    Route::get('/status/{id}', function (string $id) {
-        return view('lecturer.status-account', compact('id'));
-    })->name('status.account');
+    Route::get('/status/{nrp}', [StudentStatusController::class, 'show'])->name('status.account');
     /* ======================================================================= */
 
     // (Opsional lama) contoh /lecturer/show dummy — dibiarkan karena path beda
