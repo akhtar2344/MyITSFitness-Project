@@ -140,9 +140,10 @@
                     <div class="font-semibold mb-3">Proof</div>
                     @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
                       <img
-                        src="{{ $submission->fileAttachments->first()->url }}"
+                        src="{{ $submission->fileAttachments->first()->display_url }}"
                         alt="Proof"
                         class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl object-cover border shadow-sm"
+                        onerror="this.src='{{ asset('images/icon-user.png') }}'; this.style.background='#f1f5f9';"
                       />
                     @else
                       <div class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl border bg-slate-100/70 flex items-center justify-center text-slate-500">

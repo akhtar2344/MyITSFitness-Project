@@ -82,19 +82,20 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
             </svg>
-            <span>Back to submissions</span>
+            <span>Back to students</span>
           </a>
 
-          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Harry Styles</h1>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{{ $student->name }}</h1>
 
           <div class="mt-5 bg-white rounded-2xl border shadow-sm overflow-hidden">
             {{-- Profile header --}}
             <div class="px-6 md:px-8 py-6 border-b">
               <div class="flex items-center gap-4">
-                <img src="{{ asset('images/icon-user.png') }}" class="w-16 h-16 rounded-full object-cover" alt="Harry Styles">
+                <img src="{{ asset('images/icon-user.png') }}" class="w-16 h-16 rounded-full object-cover" alt="{{ $student->name }}">
                 <div>
-                  <p class="text-xl font-semibold leading-tight">Harry Styles</p>
-                  <p class="text-slate-500 text-sm">NRP {{ $nrp ?? '5026231000' }}</p>
+                  <p class="text-xl font-semibold leading-tight">{{ $student->name }}</p>
+                  <p class="text-slate-500 text-sm">NRP {{ $student->nrp }}</p>
+                  <p class="text-slate-500 text-sm">{{ $student->program }}</p>
                 </div>
               </div>
             </div>
@@ -115,41 +116,47 @@
                   </thead>
                   <tbody class="text-slate-800">
                     @php
-                      $rows = [
-                        ['date'=>'November 2, 2024','status'=>'Pending'],
-                        ['date'=>'October 2, 2024','status'=>'Accepted'],
-                        ['date'=>'October 1, 2024','status'=>'Need Revision'],
-                      ];
                       $badge = [
-                        'Pending'       => 'bg-blue-100 text-blue-700',
-                        'Accepted'      => 'bg-emerald-100 text-emerald-700',
-                        'Need Revision' => 'bg-amber-100 text-amber-700',
-                        'Rejected'      => 'bg-rose-100 text-rose-700',
+                        'pending'       => 'bg-blue-100 text-blue-700',
+                        'accepted'      => 'bg-emerald-100 text-emerald-700',
+                        'need_revision' => 'bg-amber-100 text-amber-700',
+                        'rejected'      => 'bg-rose-100 text-rose-700',
                       ];
-                      $nrpFixed = $nrp ?? '5026231000';
+                      $statusLabel = [
+                        'pending'       => 'Pending',
+                        'accepted'      => 'Accepted',
+                        'need_revision' => 'Need Revision',
+                        'rejected'      => 'Rejected',
+                      ];
                     @endphp
 
-                    @foreach ($rows as $i => $r)
-                      <tr
-                        class="group {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }}
-                               hover:bg-slate-50 transition-colors duration-150 cursor-pointer"
-                        onclick="window.location='{{ route('lecturer.show') }}'">
+                    @forelse ($submissions as $i => $submission)
+                      <tr class="group {{ $i % 2 ? 'bg-white' : 'bg-slate-50/40' }}
+                             hover:bg-slate-50 transition-colors duration-150 cursor-pointer"
+                          onclick="window.location='{{ route('lecturer.submissions.show', $submission->id) }}'">
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="font-semibold text-slate-900">Harry Styles</span>
+                          <span class="font-semibold text-slate-900">{{ $submission->activity->name ?? 'N/A' }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="text-slate-700">{{ $nrpFixed }}</span>
+                          <span class="text-slate-700">{{ $submission->activity->name ?? 'Unknown Activity' }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="text-slate-700">{{ $r['date'] }}</span>
+                          <span class="text-slate-700">{{ $submission->created_at->format('F d, Y') }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $badge[$r['status']] }}">
-                            {{ $r['status'] }}
+                          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                 {{ $badge[strtolower($submission->status)] ?? 'bg-slate-100 text-slate-600' }}">
+                            {{ $statusLabel[strtolower($submission->status)] ?? ucfirst($submission->status) }}
                           </span>
                         </td>
                       </tr>
-                    @endforeach
+                    @empty
+                      <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                          No submissions found for this student.
+                        </td>
+                      </tr>
+                    @endforelse
                   </tbody>
                 </table>
               </div>

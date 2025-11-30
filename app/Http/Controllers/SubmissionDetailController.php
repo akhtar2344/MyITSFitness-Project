@@ -20,7 +20,47 @@ class SubmissionDetailController extends Controller
         // Get comments (if comments table exists and has lecturer_id)
         $comments = Comment::where('submission_id', $submissionId)->get();
         
+        // Process file attachments to ensure proper URL format
+        if ($submission->fileAttachments) {
+            foreach ($submission->fileAttachments as $file) {
+                $file->display_url = $this->getFileDisplayUrl($file->url);
+            }
+        }
+        
         return view('lecturer.show', compact('submission', 'comments'));
+    }
+
+    /**
+     * Convert file URL to proper display format
+     * Handles multiple path formats: /storage/..., storage/..., submissions/...
+     */
+    private function getFileDisplayUrl($url)
+    {
+        if (!$url) {
+            return null;
+        }
+
+        // Already has /storage/ prefix
+        if (strpos($url, '/storage/') === 0) {
+            return $url;
+        }
+
+        // Has storage/ prefix without leading slash
+        if (strpos($url, 'storage/') === 0) {
+            return '/' . $url;
+        }
+
+        // Just the path without storage prefix
+        if (strpos($url, 'submissions/') === 0 || strpos($url, 'proofs/') === 0) {
+            return '/storage/' . $url;
+        }
+
+        // Fallback: assume it's a public disk path and generate URL
+        try {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($url);
+        } catch (\Exception $e) {
+            return $url;
+        }
     }
 
     /**
