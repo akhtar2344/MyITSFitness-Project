@@ -99,7 +99,6 @@
                     <th class="px-8 py-4 font-semibold">Details</th>
                     <th class="px-8 py-4 font-semibold">Submitted</th>
                     <th class="px-8 py-4 font-semibold">Proof</th>
-                    <th class="px-8 py-4 font-semibold">Attachment</th>
                   </tr>
                 </thead>
                 <tbody id="submissionTable" class="text-slate-800">
@@ -120,7 +119,7 @@
                       <td class="px-8 py-5 align-middle"><span class="h-grad text-slate-700">{{ $submission->created_at->format('M d, Y') }}</span>
                       </td>
 
-                      <!-- Proof: HANYA FOTO, tanpa frame/border/shadow/oval -->
+                      <!-- Proof: Circular images -->
                       <td class="px-8 py-5 align-middle">
                         @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
                           @php
@@ -129,19 +128,15 @@
                               $proofUrl = '/storage/' . $proofUrl;
                             }
                           @endphp
-                          <img src="{{ $proofUrl }}" alt="proof" class="proof-avatar">
+                          <img src="{{ $proofUrl }}" alt="proof" class="w-12 h-12 rounded-full object-cover border-2 border-slate-200 shadow-sm">
                         @else
                           <span class="text-slate-400 text-sm">No proof</span>
                         @endif
                       </td>
-
-                      <td class="px-8 py-5 align-middle">
-                        <span class="h-grad text-slate-700">{{ $submission->fileAttachments->first()->file_name ?? 'N/A' }}</span>
-                      </td>
                     </tr>
                   @empty
                     <tr class="bg-slate-50">
-                      <td colspan="6" class="px-8 py-12 text-center text-slate-500">
+                      <td colspan="5" class="px-8 py-12 text-center text-slate-500">
                         No submissions found
                       </td>
                     </tr>
