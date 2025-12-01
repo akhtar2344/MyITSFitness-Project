@@ -134,25 +134,27 @@
 
                 <hr class="my-6">
 
-                <!-- Proof - Circular Images -->
-                <div>
-                  <div class="font-semibold mb-3">Proof</div>
-                  @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
-                    <div class="flex flex-wrap gap-4">
-                      @foreach ($submission->fileAttachments as $file)
-                        <img
-                          src="{{ $file->display_url }}"
-                          alt="Proof"
-                          class="w-24 h-24 rounded-full object-cover border-2 border-slate-200 shadow-sm"
-                          onerror="this.src='{{ asset('images/icon-user.png') }}'; this.style.background='#f1f5f9';"
-                        />
-                      @endforeach
-                    </div>
-                  @else
-                    <div class="w-24 h-24 rounded-full border-2 border-slate-200 bg-slate-100/70 flex items-center justify-center text-slate-500 text-xs">
-                      No proof
-                    </div>
-                  @endif
+                <!-- Proof & Attachment -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <div class="font-semibold mb-3">Proof</div>
+                    @if ($submission->fileAttachments && $submission->fileAttachments->count() > 0)
+                      <img
+                        src="{{ $submission->fileAttachments->first()->display_url }}"
+                        alt="Proof"
+                        class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl object-cover border shadow-sm"
+                        onerror="this.src='{{ asset('images/icon-user.png') }}'; this.style.background='#f1f5f9';"
+                      />
+                    @else
+                      <div class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl border bg-slate-100/70 flex items-center justify-center text-slate-500">
+                        No proof uploaded
+                      </div>
+                    @endif
+                  </div>
+                  <div>
+                    <div class="font-semibold mb-3">Attachment</div>
+                    <div class="max-w-sm w-full h-44 md:h-48 lg:h-52 rounded-xl border bg-slate-100/70"></div>
+                  </div>
                 </div>
               </div>
             </div>
