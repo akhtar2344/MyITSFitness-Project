@@ -342,7 +342,7 @@ class SubmissionManagementController extends Controller
     /**
      * Show resubmit form for a submission with NeedRevision status
      */
-    public function showResubmit(Submission $submission)
+    public function beginRevision(Submission $submission)
     {
         // Check that submission belongs to current student
         $studentId = session('user_id');
@@ -410,7 +410,7 @@ class SubmissionManagementController extends Controller
     /**
      * Store resubmission
      */
-    public function storeResubmit(Request $request, Submission $submission)
+    public function submitRevision(Request $request, Submission $submission)
     {
         // Check authentication and authorization
         $studentId = session('user_id');
