@@ -231,6 +231,22 @@ class SubmissionManagementController extends Controller
             if ($submission->student_id !== $student->id) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
             }
+            
+            // Block student from commenting if submission is rejected or accepted
+            if ($submission->status === 'Rejected') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your submission has been rejected. Please resubmit your activity; you can no longer send messages for this submission.'
+                ], 403);
+            }
+            
+            if ($submission->status === 'Accepted') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your submission has been accepted, you no longer can send message here'
+                ], 403);
+            }
+            
             $userName = $student->name;
         } else {
             // Try to get lecturer record
@@ -326,7 +342,7 @@ class SubmissionManagementController extends Controller
     /**
      * Show resubmit form for a submission with NeedRevision status
      */
-    public function showResubmit(Submission $submission)
+    public function beginRevision(Submission $submission)
     {
         // Check that submission belongs to current student
         $studentId = session('user_id');
@@ -394,7 +410,7 @@ class SubmissionManagementController extends Controller
     /**
      * Store resubmission
      */
-    public function storeResubmit(Request $request, Submission $submission)
+    public function submitRevision(Request $request, Submission $submission)
     {
         // Check authentication and authorization
         $studentId = session('user_id');

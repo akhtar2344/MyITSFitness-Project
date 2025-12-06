@@ -11,7 +11,7 @@ class LecturerDashboardController extends Controller
     /**
      * Display the lecturer dashboard with real data from database.
      */
-    public function index(Request $request)
+    public function viewDashboard(Request $request)
     {
         // Get logged-in user via session (set by AuthController)
         $userId = session('user_id');

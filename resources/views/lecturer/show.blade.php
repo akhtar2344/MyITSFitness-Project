@@ -84,26 +84,29 @@
                     </div>
                   </div>
 
-                  <!-- ACTION BUTTONS: Always available to edit status -->
+                  <!-- ACTION BUTTONS: Always visible, disabled when locked -->
+                  @php
+                    $isLocked = in_array($submission->status, ['Accepted', 'Rejected', 'NeedRevision']);
+                  @endphp
                   <div class="flex items-center gap-2.5" id="actionButtons">
                     <!-- Accept: GREEN solid -->
                     <form method="POST" action="{{ route('lecturer.reviews.accept', $submission->id) }}" style="display:inline;" id="acceptForm">
                       @csrf
-                      <button type="button" id="acceptBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-all duration-200">
+                      <button type="button" id="acceptBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-all duration-200 {{ $isLocked ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isLocked ? 'disabled' : '' }}>
                         Accept
                       </button>
                     </form>
                     <!-- Reject: RED solid -->
                     <form method="POST" action="{{ route('lecturer.reviews.reject', $submission->id) }}" style="display:inline;" id="rejectForm">
                       @csrf
-                      <button type="button" id="rejectBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-all duration-200">
+                      <button type="button" id="rejectBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-all duration-200 {{ $isLocked ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isLocked ? 'disabled' : '' }}>
                         Reject
                       </button>
                     </form>
                     <!-- Request Revision: ORANGE outline -->
                     <form method="POST" action="{{ route('lecturer.reviews.requestRevision', $submission->id) }}" style="display:inline;" id="revisionForm">
                       @csrf
-                      <button type="button" id="revisionBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-all duration-200">
+                      <button type="button" id="revisionBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-all duration-200 {{ $isLocked ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isLocked ? 'disabled' : '' }}>
                         Request Revision
                       </button>
                     </form>

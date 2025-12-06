@@ -38,10 +38,10 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::view('/submit', 'student.submit')->name('submit');
 
     // ===== Status Page (Dynamic - with real submissions) =====
-    Route::get('/status', [StatusPageController::class, 'index'])->name('status');
+    Route::get('/status', [StatusPageController::class, 'openStatusPage'])->name('status');
 
     // ===== Submission Detail Page (Dynamic) =====
-    Route::get('/submissions/{submission}/view', [StudentSubmissionDetailController::class, 'show'])->name('submissions.show');
+    Route::get('/submissions/{submission}/view', [StudentSubmissionDetailController::class, 'openDetailPage'])->name('submissions.show');
 
     // ===== Activity Details (Mock Harry - static views) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
@@ -83,7 +83,7 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     Route::get('/', [StudentListController::class, 'index'])->name('index');
 
     // Dashboard lecturer - now with real data from controller
-    Route::get('/dashboard', [LecturerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [LecturerDashboardController::class, 'viewDashboard'])->name('dashboard');
 
     // ===== Students List & Detail ===== Ahmad Faiz Ramdhani
     // List students -> resources/views/lecturer/index.blade.php
