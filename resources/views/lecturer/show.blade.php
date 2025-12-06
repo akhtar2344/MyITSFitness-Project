@@ -92,21 +92,21 @@
                     <!-- Accept: GREEN solid -->
                     <form method="POST" action="{{ route('lecturer.reviews.accept', $submission->id) }}" style="display:inline;" id="acceptForm">
                       @csrf
-                      <button type="button" id="acceptBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-all duration-200 {{ $isLocked ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isLocked ? 'disabled' : '' }}>
+                      <button type="button" id="acceptBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-all duration-200">
                         Accept
                       </button>
                     </form>
                     <!-- Reject: RED solid -->
                     <form method="POST" action="{{ route('lecturer.reviews.reject', $submission->id) }}" style="display:inline;" id="rejectForm">
                       @csrf
-                      <button type="button" id="rejectBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-all duration-200 {{ $isLocked ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isLocked ? 'disabled' : '' }}>
+                      <button type="button" id="rejectBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-all duration-200">
                         Reject
                       </button>
                     </form>
                     <!-- Request Revision: ORANGE outline -->
                     <form method="POST" action="{{ route('lecturer.reviews.requestRevision', $submission->id) }}" style="display:inline;" id="revisionForm">
                       @csrf
-                      <button type="button" id="revisionBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-all duration-200 {{ $isLocked ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isLocked ? 'disabled' : '' }}>
+                      <button type="button" id="revisionBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-all duration-200">
                         Request Revision
                       </button>
                     </form>
@@ -247,6 +247,40 @@
             </button>
             <button id="confirmBtn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
               Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revision Reason Modal (appears after confirm revision) -->
+    <div id="revisionReasonModal" class="fixed inset-0 z-50 hidden">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/40"></div>
+      
+      <!-- Modal Content -->
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto">
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-slate-100">
+            <div class="text-center">
+              <span class="font-semibold text-slate-800">Revision Reason</span>
+            </div>
+          </div>
+          
+          <!-- Body -->
+          <div class="px-6 py-6">
+            <p class="text-slate-700 text-sm mb-4">Please provide the reason for revision to the student:</p>
+            <textarea id="revisionReasonInput" class="w-full h-32 px-4 py-3 border border-slate-200 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-100 resize-none" placeholder="Enter revision reason..."></textarea>
+          </div>
+          
+          <!-- Footer -->
+          <div class="px-6 py-4 bg-slate-50 rounded-b-2xl flex items-center justify-end gap-3">
+            <button id="cancelRevisionReasonBtn" class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+              Cancel
+            </button>
+            <button id="sendRevisionReasonBtn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
+              Send
             </button>
           </div>
         </div>
@@ -410,34 +444,38 @@
       updateState();
     })();
 
-    // Grading buttons confirmation and greyed out effect
-    (function() {
+    // Simple Grading Buttons with Grey Out Effect
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get all button elements
       const acceptBtn = document.getElementById('acceptBtn');
-      const rejectBtn = document.getElementById('rejectBtn');
+      const rejectBtn = document.getElementById('rejectBtn');  
       const revisionBtn = document.getElementById('revisionBtn');
+      
       const acceptForm = document.getElementById('acceptForm');
       const rejectForm = document.getElementById('rejectForm');
       const revisionForm = document.getElementById('revisionForm');
       
-      // Modal elements
       const modal = document.getElementById('confirmationModal');
       const confirmMessage = document.getElementById('confirmationMessage');
       const confirmBtn = document.getElementById('confirmBtn');
       const cancelBtn = document.getElementById('cancelBtn');
       
-      let currentAction = null;
+      // Revision reason modal
+      const revisionModal = document.getElementById('revisionReasonModal');
+      const revisionInput = document.getElementById('revisionReasonInput');
+      const sendRevisionBtn = document.getElementById('sendRevisionReasonBtn');
+      const cancelRevisionBtn = document.getElementById('cancelRevisionReasonBtn');
+      
       let currentForm = null;
+      let currentAction = '';
       
-      // Greyed out styles
-      const greyedOutClasses = [
-        'opacity-50', 'cursor-not-allowed', 'pointer-events-none'
-      ];
-      
+      // Grey out functions
       function greyOutOthers(selectedBtn) {
         const allBtns = [acceptBtn, rejectBtn, revisionBtn];
         allBtns.forEach(btn => {
           if (btn !== selectedBtn) {
-            btn.classList.add(...greyedOutClasses);
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
           }
         });
       }
@@ -445,87 +483,175 @@
       function resetButtons() {
         const allBtns = [acceptBtn, rejectBtn, revisionBtn];
         allBtns.forEach(btn => {
-          btn.classList.remove(...greyedOutClasses);
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
         });
       }
       
-      function showModal(action, form) {
-        const messages = {
-          accept: 'Are you sure you want to accept this submission?',
-          reject: 'Are you sure you want to reject this submission?', 
-          revision: 'Are you sure you want to request a revision for this submission?'
-        };
-        
-        currentAction = action;
-        currentForm = form;
-        confirmMessage.textContent = messages[action];
+      // Check if submission is already graded (locked)
+      const isLocked = {{ $isLocked ? 'true' : 'false' }};
+      if (isLocked) {
+        // If already graded, grey out all buttons permanently
+        const allBtns = [acceptBtn, rejectBtn, revisionBtn];
+        allBtns.forEach(btn => {
+          btn.style.opacity = '0.5';
+          btn.style.pointerEvents = 'none';
+        });
+        return; // Exit early, no event handlers needed
+      }
+      
+      // Accept button click
+      acceptBtn.onclick = function() {
+        greyOutOthers(acceptBtn);
+        currentForm = acceptForm;
+        currentAction = 'accept';
+        confirmMessage.textContent = 'Are you sure you want to accept this submission?';
         modal.classList.remove('hidden');
-      }
+      };
       
-      function hideModal() {
+      // Reject button click
+      rejectBtn.onclick = function() {
+        greyOutOthers(rejectBtn);
+        currentForm = rejectForm;
+        currentAction = 'reject';
+        confirmMessage.textContent = 'Are you sure you want to reject this submission?';
+        modal.classList.remove('hidden');
+      };
+      
+      // Revision button click  
+      revisionBtn.onclick = function() {
+        greyOutOthers(revisionBtn);
+        currentForm = revisionForm;
+        currentAction = 'revision';
+        confirmMessage.textContent = 'Are you sure you want to request a revision for this submission?';
+        modal.classList.remove('hidden');
+      };
+      
+      // Confirm button in modal
+      confirmBtn.onclick = function() {
         modal.classList.add('hidden');
-        currentAction = null;
+        
+        if (currentAction === 'revision') {
+          // Show revision reason modal
+          revisionInput.value = '';
+          revisionModal.classList.remove('hidden');
+          revisionInput.focus();
+        } else {
+          // Submit accept/reject directly
+          if (currentForm) {
+            currentForm.submit();
+          }
+        }
+      };
+      
+      // Cancel button in confirmation modal
+      cancelBtn.onclick = function() {
+        modal.classList.add('hidden');
+        resetButtons(); // Reset grey out when cancelled
         currentForm = null;
-        resetButtons();
-      }
+        currentAction = '';
+      };
       
-      // Modal event listeners
-      cancelBtn.addEventListener('click', hideModal);
-      
-      confirmBtn.addEventListener('click', function() {
-        if (currentForm) {
-          // Simple and reliable: create form data and send via fetch
-          const formData = new FormData(currentForm);
-          
-          fetch(currentForm.action, {
+      // Send revision with reason
+      sendRevisionBtn.onclick = function() {
+        const reason = revisionInput.value.trim();
+        if (!reason) {
+          alert('Please provide a reason for revision');
+          return;
+        }
+        
+        revisionModal.classList.add('hidden');
+        
+        // First submit revision status change
+        const formData = new FormData(currentForm);
+        
+        fetch(currentForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(response => {
+          // Then send the comment with reason
+          return fetch('{{ route("student.submissions.comment", $submission->id) }}', {
             method: 'POST',
-            body: formData,
             headers: {
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+              'Content-Type': 'application/json',
               'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              content: reason
+            })
+          });
+        }).then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Reload to show updated status and new comment
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            } else {
+              alert('Error: ' + (data.message || 'Failed to send comment'));
+              window.location.reload();
             }
-          }).then(response => {
-            // Always reload page after submission to show updated status
-            window.location.reload();
-          }).catch(error => {
-            console.error('Submission error:', error);
-            // Even if error, try reload to see if it worked
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
             window.location.reload();
           });
-        }
-      });
+      };
       
-      // Close modal on backdrop click
-      modal.addEventListener('click', function(e) {
+      // Cancel revision reason modal
+      cancelRevisionBtn.onclick = function() {
+        revisionModal.classList.add('hidden');
+        revisionInput.value = '';
+        resetButtons(); // Reset grey out when cancelled
+        currentForm = null;
+        currentAction = '';
+      };
+      
+      // Close confirmation modal on backdrop click
+      modal.onclick = function(e) {
         if (e.target === modal) {
-          hideModal();
+          modal.classList.add('hidden');
+          resetButtons();
+          currentForm = null;
+          currentAction = '';
         }
-      });
+      };
       
-      // Close modal on ESC key
+      // Close revision modal on backdrop click
+      revisionModal.onclick = function(e) {
+        if (e.target === revisionModal) {
+          revisionModal.classList.add('hidden');
+          revisionInput.value = '';
+          resetButtons();
+          currentForm = null;
+          currentAction = '';
+        }
+      };
+      
+      // Close modals on ESC key
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-          hideModal();
+        if (e.key === 'Escape') {
+          if (!modal.classList.contains('hidden')) {
+            modal.classList.add('hidden');
+            resetButtons();
+            currentForm = null;
+            currentAction = '';
+          }
+          if (!revisionModal.classList.contains('hidden')) {
+            revisionModal.classList.add('hidden');
+            revisionInput.value = '';
+            resetButtons();
+            currentForm = null;
+            currentAction = '';
+          }
         }
       });
-      
-      acceptBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        greyOutOthers(acceptBtn);
-        showModal('accept', acceptForm);
-      });
-      
-      rejectBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        greyOutOthers(rejectBtn);
-        showModal('reject', rejectForm);
-      });
-      
-      revisionBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        greyOutOthers(revisionBtn);
-        showModal('revision', revisionForm);
-      });
-    })();
+    });
   </script>
 </body>
 </html>

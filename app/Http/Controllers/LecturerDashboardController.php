@@ -33,10 +33,10 @@ class LecturerDashboardController extends Controller
         $needRevisionCount = Submission::where('status', 'NeedRevision')->count();
         $rejectedCount = Submission::where('status', 'Rejected')->count();
 
-        // Recent submissions (latest 8) dengan eager load relations
+        // Recent submissions (latest 5) dengan eager load relations
         $recentSubmissions = Submission::with(['student', 'activity', 'fileAttachments'])
             ->orderBy('created_at', 'desc')
-            ->take(8)
+            ->take(5)
             ->get();
 
         // Debug: Log jumlah submissions yang diambil
