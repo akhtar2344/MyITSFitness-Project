@@ -11,7 +11,7 @@ class StatusPageController extends Controller
     /**
      * Display submission status page with all submissions
      */
-    public function index(Request $request)
+    public function viewStatusPage(Request $request)
     {
         // Get logged-in user
         $userId = session('user_id');

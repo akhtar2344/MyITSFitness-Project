@@ -12,7 +12,7 @@ class SubmissionDetailController extends Controller
      * Show the detail page for a specific submission.
      * GET /student/submissions/{id}/view
      */
-    public function show(Submission $submission)
+    public function viewSubmissionStatus(Submission $submission)
     {
         // Get logged-in user
         $userId = session('user_id');

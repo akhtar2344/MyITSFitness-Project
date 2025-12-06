@@ -38,10 +38,10 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::view('/submit', 'student.submit')->name('submit');
 
     // ===== Status Page (Dynamic - with real submissions) =====
-    Route::get('/status', [StatusPageController::class, 'index'])->name('status');
+    Route::get('/status', [StatusPageController::class, 'viewStatusPage'])->name('status');
 
     // ===== Submission Detail Page (Dynamic) =====
-    Route::get('/submissions/{submission}/view', [StudentSubmissionDetailController::class, 'show'])->name('submissions.show');
+    Route::get('/submissions/{submission}/view', [StudentSubmissionDetailController::class, 'viewSubmissionStatus'])->name('submissions.show');
 
     // ===== Activity Details (Mock Harry - static views) =====
     Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
@@ -68,8 +68,8 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::get('/submissions/edit', [SubmissionManagementController::class, 'edit'])->name('submissions.edit');
     Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
     Route::post('/submissions/{submission}/cancel', [SubmissionManagementController::class, 'cancel'])->name('submissions.cancel');
-    Route::get('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'showResubmit'])->name('submissions.resubmit');
-    Route::post('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'storeResubmit'])->name('submissions.resubmitStore');
+    Route::get('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'beginRevision'])->name('submissions.resubmit');
+    Route::post('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'submitRevision'])->name('submissions.resubmitStore');
     Route::post('/submissions/{submission}/comment', [SubmissionManagementController::class, 'storeComment'])->name('submissions.comment');
     Route::delete('/comments/{comment}', [SubmissionManagementController::class, 'deleteComment'])->where('comment', '[a-f0-9\\-]+')->name('comments.delete');
     Route::get('/{id}', [ShowController::class, 'show'])->name('show');
@@ -83,7 +83,7 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     Route::get('/', [StudentListController::class, 'index'])->name('index');
 
     // Dashboard lecturer - now with real data from controller
-    Route::get('/dashboard', [LecturerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [LecturerDashboardController::class, 'viewDashboard'])->name('dashboard');
 
     // ===== Students List & Detail ===== Ahmad Faiz Ramdhani
     // List students -> resources/views/lecturer/index.blade.php
@@ -120,8 +120,8 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
 | LECTURER REVIEWS (List + Action) - Marvello Adipertama
 |--------------------------------------------------------------*/
 Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () {
-    Route::get('/', [SubmissionReviewController::class, 'index'])->name('index');
-    Route::get('/sublec', [SubmissionReviewController::class, 'index'])->name('sublec');
+    Route::get('/', [SubmissionReviewController::class, 'displaySubmissionSummary'])->name('index');
+    Route::get('/sublec', [SubmissionReviewController::class, 'displaySubmissionSummary'])->name('sublec');
 
     Route::post('/{submission}/accept', [SubmissionDetailController::class, 'accept'])->name('accept');
     Route::post('/{submission}/reject', [SubmissionDetailController::class, 'reject'])->name('reject');
