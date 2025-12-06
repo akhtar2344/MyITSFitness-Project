@@ -11,7 +11,7 @@ class SubmissionReviewController extends Controller
     /**
      * Display submissions for lecturer review.
      */
-    public function index(Request $request)
+    public function openSubmissionPage(Request $request)
     {
         // Get all submissions with their relations, ordered by latest
         $submissions = Submission::with(['student', 'activity', 'fileAttachments'])

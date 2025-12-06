@@ -67,10 +67,10 @@ Route::prefix('student')->name('student.')->group(function () {
 
     Route::get('/submissions/edit', [SubmissionManagementController::class, 'edit'])->name('submissions.edit');
     Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
-    Route::post('/submissions/{submission}/cancel', [SubmissionManagementController::class, 'cancel'])->name('submissions.cancel');
+    Route::post('/submissions/{submission}/cancel', [SubmissionManagementController::class, 'cancelSubmissionRequest'])->name('submissions.cancel');
     Route::get('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'showResubmit'])->name('submissions.resubmit');
     Route::post('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'storeResubmit'])->name('submissions.resubmitStore');
-    Route::post('/submissions/{submission}/comment', [SubmissionManagementController::class, 'storeComment'])->name('submissions.comment');
+    Route::post('/submissions/{submission}/comment', [SubmissionManagementController::class, 'SendCommentRequset'])->name('submissions.comment');
     Route::delete('/comments/{comment}', [SubmissionManagementController::class, 'deleteComment'])->where('comment', '[a-f0-9\\-]+')->name('comments.delete');
     Route::get('/{id}', [ShowController::class, 'show'])->name('show');
 });
@@ -90,7 +90,7 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
     Route::get('/students', [StudentListController::class, 'index'])->name('students.index');
 
      // Detail submission -> resources/views/lecturer/show.blade.php
-    Route::get('/submissions/{submission}', [SubmissionDetailController::class, 'show'])->name('submissions.show');
+    Route::get('/submissions/{submission}', [SubmissionDetailController::class, 'openSubmissionDetailPage'])->name('submissions.show');
 
      /* ====== NEW: Lecturer Status Account (untuk halaman seperti figma) ====== */
     Route::get('/status/{nrp}', [StudentStatusController::class, 'show'])->name('status.account');
@@ -120,8 +120,8 @@ Route::prefix('lecturer')->name('lecturer.')->group(function () {
 | LECTURER REVIEWS (List + Action) - Marvello Adipertama
 |--------------------------------------------------------------*/
 Route::prefix('lecturer/reviews')->name('lecturer.reviews.')->group(function () {
-    Route::get('/', [SubmissionReviewController::class, 'index'])->name('index');
-    Route::get('/sublec', [SubmissionReviewController::class, 'index'])->name('sublec');
+    Route::get('/', [SubmissionReviewController::class, 'openSubmissionPage'])->name('index');
+    Route::get('/sublec', [SubmissionReviewController::class, 'openSubmissionPage'])->name('sublec');
 
     Route::post('/{submission}/accept', [SubmissionDetailController::class, 'accept'])->name('accept');
     Route::post('/{submission}/reject', [SubmissionDetailController::class, 'reject'])->name('reject');

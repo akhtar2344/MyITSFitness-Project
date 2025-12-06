@@ -212,7 +212,7 @@ class SubmissionManagementController extends Controller
      * Store a private comment on a submission
      * POST /student/submissions/{id}/comment
      */
-    public function storeComment(Submission $submission, Request $request)
+    public function SendCommentRequset(Submission $submission, Request $request)
     {
         // Get current logged-in user
         $userId = session('user_id');
