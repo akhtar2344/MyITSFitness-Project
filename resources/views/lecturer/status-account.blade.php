@@ -106,7 +106,7 @@
 
               <div class="rounded-2xl border bg-white overflow-hidden">
                 <table class="min-w-full">
-                  <thead class="bg-slate-50 text-slate-500">
+                  <thead class="bg-slate-50 text-slate-500 sticky top-0 z-10">
                     <tr>
                       <th class="text-left px-6 py-4 text-sm font-semibold">Name</th>
                       <th class="text-left px-6 py-4 text-sm font-semibold">Activity</th>
@@ -114,18 +114,21 @@
                       <th class="text-left px-6 py-4 text-sm font-semibold">Status</th>
                     </tr>
                   </thead>
-                  <tbody class="text-slate-800">
+                </table>
+                <div class="max-h-[300px] overflow-y-auto">
+                  <table class="min-w-full">
+                    <tbody class="text-slate-800">
                     @php
                       $badge = [
                         'pending'       => 'bg-blue-100 text-blue-700',
-                        'accepted'      => 'bg-emerald-100 text-emerald-700',
-                        'need_revision' => 'bg-amber-100 text-amber-700',
+                        'accepted'      => 'bg-emerald-100 text-emerald-700', 
+                        'needrevision'  => 'bg-amber-100 text-amber-700',
                         'rejected'      => 'bg-rose-100 text-rose-700',
                       ];
                       $statusLabel = [
                         'pending'       => 'Pending',
                         'accepted'      => 'Accepted',
-                        'need_revision' => 'Need Revision',
+                        'needrevision'  => 'NeedRevision', 
                         'rejected'      => 'Rejected',
                       ];
                     @endphp
@@ -159,6 +162,7 @@
                     @endforelse
                   </tbody>
                 </table>
+                </div>
               </div>
 
             </div>

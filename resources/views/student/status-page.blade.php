@@ -163,11 +163,10 @@
           {{-- Table card --}}
           <div class="mt-6 rounded-2xl bg-white border shadow-sm p-0 overflow-hidden">
             {{-- Scrollable container --}}
-            <div class="overflow-x-auto overflow-y-auto max-h-[576px] pr-2">
+            <div class="overflow-x-auto overflow-y-auto max-h-[544px] pr-2">
               <table class="min-w-full">
                 <thead class="text-left text-slate-500 text-sm bg-slate-50 sticky top-0 z-10">
                   <tr>
-                    <th class="px-8 py-4 font-semibold">Name</th>
                     <th class="px-8 py-4 font-semibold">Activity</th>
                     <th class="px-8 py-4 font-semibold">Date</th>
                     <th class="px-8 py-4 font-semibold">Status</th>
@@ -193,13 +192,6 @@
                       role="button"
                     >
                       <td class="px-8 py-4">
-                        <span class="font-semibold text-slate-900 transition duration-200
-                                     group-hover:text-transparent group-hover:bg-clip-text
-                                     group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
-                          {{ $student->name ?? 'Unknown' }}
-                        </span>
-                      </td>
-                      <td class="px-8 py-4">
                         <span class="font-semibold text-slate-600 transition duration-200
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
@@ -223,7 +215,7 @@
                     </tr>
                   @empty
                     <tr class="bg-white">
-                      <td colspan="4" class="px-8 py-12 text-center text-slate-500">
+                      <td colspan="3" class="px-8 py-12 text-center text-slate-500">
                         <p>No submissions yet. <a href="{{ route('student.submit') }}" class="text-blue-600 hover:underline">Submit your first activity</a></p>
                       </td>
                     </tr>

@@ -86,7 +86,7 @@
           {{-- Table card --}}
           <div class="mt-6 rounded-2xl bg-white border shadow-sm p-0 overflow-hidden">
             {{-- Scrollable container: kira-kira 8 baris, header sticky --}}
-            <div class="overflow-x-auto overflow-y-auto max-h-[576px] pr-2">
+            <div class="overflow-x-auto overflow-y-auto max-h-[480px] pr-2">
               <table class="min-w-full">
                 <thead class="text-left text-slate-500 text-sm bg-slate-50 sticky top-0 z-10">
                   <tr>
@@ -111,7 +111,7 @@
 
                       {{-- NRP --}}
                       <td class="px-8 py-4">
-                        <span class="inline-block font-semibold text-slate-600 transition duration-200
+                        <span class="inline-block text-slate-600 transition duration-200
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
                           {{ $student->nrp }}
@@ -120,7 +120,7 @@
 
                       {{-- EMAIL --}}
                       <td class="px-8 py-4">
-                        <span class="inline-block font-semibold text-slate-600 transition duration-200
+                        <span class="inline-block text-slate-600 transition duration-200
                                      group-hover:text-transparent group-hover:bg-clip-text
                                      group-hover:bg-gradient-to-r group-hover:from-[#5b83ff] group-hover:to-[#7b61ff]">
                           {{ $student->email }}
