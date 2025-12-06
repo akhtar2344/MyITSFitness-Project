@@ -85,25 +85,25 @@
                   </div>
 
                   <!-- ACTION BUTTONS: Always available to edit status -->
-                  <div class="flex items-center gap-2.5">
+                  <div class="flex items-center gap-2.5" id="actionButtons">
                     <!-- Accept: GREEN solid -->
-                    <form method="POST" action="{{ route('lecturer.reviews.accept', $submission->id) }}" style="display:inline;">
+                    <form method="POST" action="{{ route('lecturer.reviews.accept', $submission->id) }}" style="display:inline;" id="acceptForm">
                       @csrf
-                      <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-colors">
+                      <button type="button" id="acceptBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-emerald-500 text-white font-semibold shadow-sm hover:bg-emerald-600 active:translate-y-px transition-all duration-200">
                         Accept
                       </button>
                     </form>
                     <!-- Reject: RED solid -->
-                    <form method="POST" action="{{ route('lecturer.reviews.reject', $submission->id) }}" style="display:inline;">
+                    <form method="POST" action="{{ route('lecturer.reviews.reject', $submission->id) }}" style="display:inline;" id="rejectForm">
                       @csrf
-                      <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-colors">
+                      <button type="button" id="rejectBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl bg-rose-500 text-white font-semibold shadow-sm hover:bg-rose-600 active:translate-y-px transition-all duration-200">
                         Reject
                       </button>
                     </form>
                     <!-- Request Revision: ORANGE outline -->
-                    <form method="POST" action="{{ route('lecturer.reviews.requestRevision', $submission->id) }}" style="display:inline;">
+                    <form method="POST" action="{{ route('lecturer.reviews.requestRevision', $submission->id) }}" style="display:inline;" id="revisionForm">
                       @csrf
-                      <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-colors">
+                      <button type="button" id="revisionBtn" class="grading-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl border-2 border-amber-400 text-amber-600 font-semibold bg-white hover:bg-amber-50 active:translate-y-px transition-all duration-200">
                         Request Revision
                       </button>
                     </form>
@@ -214,6 +214,39 @@
             </aside>
           </div>
         </section>
+      </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 z-50 hidden">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/40"></div>
+      
+      <!-- Modal Content -->
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto">
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-slate-100">
+            <div class="text-center">
+              <span class="font-semibold text-slate-800">Confirmation</span>
+            </div>
+          </div>
+          
+          <!-- Body -->
+          <div class="px-6 py-6">
+            <p id="confirmationMessage" class="text-slate-700 text-center">Are you sure you want to proceed?</p>
+          </div>
+          
+          <!-- Footer -->
+          <div class="px-6 py-4 bg-slate-50 rounded-b-2xl flex items-center justify-end gap-3">
+            <button id="cancelBtn" class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+              Cancel
+            </button>
+            <button id="confirmBtn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
+              Confirm
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -372,6 +405,123 @@
       });
 
       updateState();
+    })();
+
+    // Grading buttons confirmation and greyed out effect
+    (function() {
+      const acceptBtn = document.getElementById('acceptBtn');
+      const rejectBtn = document.getElementById('rejectBtn');
+      const revisionBtn = document.getElementById('revisionBtn');
+      const acceptForm = document.getElementById('acceptForm');
+      const rejectForm = document.getElementById('rejectForm');
+      const revisionForm = document.getElementById('revisionForm');
+      
+      // Modal elements
+      const modal = document.getElementById('confirmationModal');
+      const confirmMessage = document.getElementById('confirmationMessage');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      
+      let currentAction = null;
+      let currentForm = null;
+      
+      // Greyed out styles
+      const greyedOutClasses = [
+        'opacity-50', 'cursor-not-allowed', 'pointer-events-none'
+      ];
+      
+      function greyOutOthers(selectedBtn) {
+        const allBtns = [acceptBtn, rejectBtn, revisionBtn];
+        allBtns.forEach(btn => {
+          if (btn !== selectedBtn) {
+            btn.classList.add(...greyedOutClasses);
+          }
+        });
+      }
+      
+      function resetButtons() {
+        const allBtns = [acceptBtn, rejectBtn, revisionBtn];
+        allBtns.forEach(btn => {
+          btn.classList.remove(...greyedOutClasses);
+        });
+      }
+      
+      function showModal(action, form) {
+        const messages = {
+          accept: 'Are you sure you want to accept this submission?',
+          reject: 'Are you sure you want to reject this submission?', 
+          revision: 'Are you sure you want to request a revision for this submission?'
+        };
+        
+        currentAction = action;
+        currentForm = form;
+        confirmMessage.textContent = messages[action];
+        modal.classList.remove('hidden');
+      }
+      
+      function hideModal() {
+        modal.classList.add('hidden');
+        currentAction = null;
+        currentForm = null;
+        resetButtons();
+      }
+      
+      // Modal event listeners
+      cancelBtn.addEventListener('click', hideModal);
+      
+      confirmBtn.addEventListener('click', function() {
+        if (currentForm) {
+          // Simple and reliable: create form data and send via fetch
+          const formData = new FormData(currentForm);
+          
+          fetch(currentForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }).then(response => {
+            // Always reload page after submission to show updated status
+            window.location.reload();
+          }).catch(error => {
+            console.error('Submission error:', error);
+            // Even if error, try reload to see if it worked
+            window.location.reload();
+          });
+        }
+      });
+      
+      // Close modal on backdrop click
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          hideModal();
+        }
+      });
+      
+      // Close modal on ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          hideModal();
+        }
+      });
+      
+      acceptBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        greyOutOthers(acceptBtn);
+        showModal('accept', acceptForm);
+      });
+      
+      rejectBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        greyOutOthers(rejectBtn);
+        showModal('reject', rejectForm);
+      });
+      
+      revisionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        greyOutOthers(revisionBtn);
+        showModal('revision', revisionForm);
+      });
     })();
   </script>
 </body>
