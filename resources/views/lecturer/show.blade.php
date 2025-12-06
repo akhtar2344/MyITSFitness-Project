@@ -286,6 +286,40 @@
         </div>
       </div>
     </div>
+
+    <!-- Rejection Reason Modal (appears after confirm rejection) -->
+    <div id="rejectionReasonModal" class="fixed inset-0 z-50 hidden">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/40"></div>
+      
+      <!-- Modal Content -->
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto">
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-slate-100">
+            <div class="text-center">
+              <span class="font-semibold text-slate-800">Rejection Reason</span>
+            </div>
+          </div>
+          
+          <!-- Body -->
+          <div class="px-6 py-6">
+            <p class="text-slate-700 text-sm mb-4">Please provide the reason for rejection to the student:</p>
+            <textarea id="rejectionReasonInput" class="w-full h-32 px-4 py-3 border border-slate-200 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-100 resize-none" placeholder="Enter rejection reason..."></textarea>
+          </div>
+          
+          <!-- Footer -->
+          <div class="px-6 py-4 bg-slate-50 rounded-b-2xl flex items-center justify-end gap-3">
+            <button id="cancelRejectionReasonBtn" class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+              Cancel
+            </button>
+            <button id="sendRejectionReasonBtn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Logout Overlay logic + send button interactions -->
@@ -466,6 +500,12 @@
       const sendRevisionBtn = document.getElementById('sendRevisionReasonBtn');
       const cancelRevisionBtn = document.getElementById('cancelRevisionReasonBtn');
       
+      // Rejection reason modal
+      const rejectionModal = document.getElementById('rejectionReasonModal');
+      const rejectionInput = document.getElementById('rejectionReasonInput');
+      const sendRejectionBtn = document.getElementById('sendRejectionReasonBtn');
+      const cancelRejectionBtn = document.getElementById('cancelRejectionReasonBtn');
+      
       let currentForm = null;
       let currentAction = '';
       
@@ -536,8 +576,13 @@
           revisionInput.value = '';
           revisionModal.classList.remove('hidden');
           revisionInput.focus();
+        } else if (currentAction === 'reject') {
+          // Show rejection reason modal
+          rejectionInput.value = '';
+          rejectionModal.classList.remove('hidden');
+          rejectionInput.focus();
         } else {
-          // Submit accept/reject directly
+          // Submit accept directly
           if (currentForm) {
             currentForm.submit();
           }
@@ -603,10 +648,70 @@
           });
       };
       
+      // Send rejection with reason
+      sendRejectionBtn.onclick = function() {
+        const reason = rejectionInput.value.trim();
+        if (!reason) {
+          alert('Please provide a reason for rejection');
+          return;
+        }
+        
+        rejectionModal.classList.add('hidden');
+        
+        // First submit rejection status change
+        const formData = new FormData(currentForm);
+        
+        fetch(currentForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(response => {
+          // Then send the comment with reason
+          return fetch('{{ route("student.submissions.comment", $submission->id) }}', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              content: reason
+            })
+          });
+        }).then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Reload to show updated status and new comment
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            } else {
+              alert('Error: ' + (data.message || 'Failed to send comment'));
+              window.location.reload();
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+            window.location.reload();
+          });
+      };
+      
       // Cancel revision reason modal
       cancelRevisionBtn.onclick = function() {
         revisionModal.classList.add('hidden');
         revisionInput.value = '';
+        resetButtons(); // Reset grey out when cancelled
+        currentForm = null;
+        currentAction = '';
+      };
+      
+      // Cancel rejection reason modal
+      cancelRejectionBtn.onclick = function() {
+        rejectionModal.classList.add('hidden');
+        rejectionInput.value = '';
         resetButtons(); // Reset grey out when cancelled
         currentForm = null;
         currentAction = '';
@@ -633,6 +738,17 @@
         }
       };
       
+      // Close rejection modal on backdrop click
+      rejectionModal.onclick = function(e) {
+        if (e.target === rejectionModal) {
+          rejectionModal.classList.add('hidden');
+          rejectionInput.value = '';
+          resetButtons();
+          currentForm = null;
+          currentAction = '';
+        }
+      };
+      
       // Close modals on ESC key
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -645,6 +761,13 @@
           if (!revisionModal.classList.contains('hidden')) {
             revisionModal.classList.add('hidden');
             revisionInput.value = '';
+            resetButtons();
+            currentForm = null;
+            currentAction = '';
+          }
+          if (!rejectionModal.classList.contains('hidden')) {
+            rejectionModal.classList.add('hidden');
+            rejectionInput.value = '';
             resetButtons();
             currentForm = null;
             currentAction = '';
