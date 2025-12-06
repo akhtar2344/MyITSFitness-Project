@@ -165,14 +165,35 @@
               </div>
 
               <div class="pt-4 mt-4 border-t">
-                <form id="commentForm" class="flex items-center gap-3">
-                  <input id="commentInput" type="text" placeholder="Type your comments"
-                         class="flex-1 min-w-0 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
-                  <button id="sendBtn" type="submit"
-                          class="send-btn px-4 py-2 rounded-lg bg-[#7b61ff] text-white font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                    Send
-                  </button>
-                </form>
+                {{-- Check if user is student (not lecturer) --}}
+                @if(!session('user_type') || session('user_type') === 'student')
+                  {{-- Student: Show locked message --}}
+                  <div class="rounded-lg bg-amber-50 border border-amber-200 p-3 mb-3">
+                    <p class="text-sm text-amber-800 font-medium">
+                      ✓ Your submission has been accepted, you no longer can send message here
+                    </p>
+                  </div>
+                  <form id="commentForm" class="flex items-center gap-3">
+                    <input id="commentInput" type="text" placeholder="You can no longer send messages"
+                           class="flex-1 min-w-0 rounded-lg border px-3 py-2 text-sm bg-slate-100 text-slate-500 cursor-not-allowed"
+                           disabled>
+                    <button id="sendBtn" type="submit"
+                            class="send-btn px-4 py-2 rounded-lg bg-slate-300 text-slate-500 font-medium shadow-sm cursor-not-allowed"
+                            disabled>
+                      Send
+                    </button>
+                  </form>
+                @else
+                  {{-- Lecturer: Show normal form --}}
+                  <form id="commentForm" class="flex items-center gap-3">
+                    <input id="commentInput" type="text" placeholder="Type your comments"
+                           class="flex-1 min-w-0 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <button id="sendBtn" type="submit"
+                            class="send-btn px-4 py-2 rounded-lg bg-[#7b61ff] text-white font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                      Send
+                    </button>
+                  </form>
+                @endif
               </div>
             </aside>
           </div>

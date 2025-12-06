@@ -100,6 +100,12 @@ class SubmissionDetailController extends Controller
         }
         */
         
+        // Block status changes if already finalized (Accepted or Rejected)
+        if (in_array($submission->status, ['Accepted', 'Rejected'])) {
+            return redirect()->route('lecturer.submissions.show', $submission->id)
+                ->with('error', 'Cannot change status: Submission is already finalized (' . $submission->status . ')');
+        }
+        
         \Log::info('Accepting submission', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'Accepted']);
         \Log::info('Submission accepted', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
@@ -120,6 +126,12 @@ class SubmissionDetailController extends Controller
         }
         */
         
+        // Block status changes if already finalized (Accepted or Rejected)
+        if (in_array($submission->status, ['Accepted', 'Rejected'])) {
+            return redirect()->route('lecturer.submissions.show', $submission->id)
+                ->with('error', 'Cannot change status: Submission is already finalized (' . $submission->status . ')');
+        }
+        
         \Log::info('Rejecting submission', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'Rejected']);
         \Log::info('Submission rejected', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
@@ -139,6 +151,12 @@ class SubmissionDetailController extends Controller
                 ->with('error', 'Unauthorized: Only lecturers can request revisions');
         }
         */
+        
+        // Block status changes if already finalized (Accepted or Rejected)
+        if (in_array($submission->status, ['Accepted', 'Rejected'])) {
+            return redirect()->route('lecturer.submissions.show', $submission->id)
+                ->with('error', 'Cannot change status: Submission is already finalized (' . $submission->status . ')');
+        }
         
         \Log::info('Requesting revision', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'NeedRevision']);
