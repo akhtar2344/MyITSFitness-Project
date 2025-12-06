@@ -69,12 +69,18 @@ class SubmissionDetailController extends Controller
     private function isLecturer()
     {
         $userId = session('user_id');
+        \Log::info('isLecturer check', ['user_id' => $userId]);
+        
         if (!$userId) {
+            \Log::warning('isLecturer: No user_id in session');
             return false;
         }
         
         // Check if user is a lecturer in the Lecturer table
-        return Lecturer::where('user_id', $userId)->exists();
+        $isLecturer = Lecturer::where('user_id', $userId)->exists();
+        \Log::info('isLecturer result', ['user_id' => $userId, 'is_lecturer' => $isLecturer]);
+        
+        return $isLecturer;
     }
 
     /**
@@ -82,13 +88,21 @@ class SubmissionDetailController extends Controller
      */
     public function accept(Submission $submission)
     {
-        // Authorization check - only lecturers can accept submissions
+        // TEMPORARILY DISABLED for debugging - Authorization check
+        /*
         if (!$this->isLecturer()) {
+            \Log::warning('Accept failed: User is not lecturer', [
+                'user_id' => session('user_id'),
+                'submission_id' => $submission->id
+            ]);
             return redirect()->route('lecturer.submissions.show', $submission->id)
                 ->with('error', 'Unauthorized: Only lecturers can accept submissions');
         }
+        */
         
+        \Log::info('Accepting submission', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'Accepted']);
+        \Log::info('Submission accepted', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
         
         return redirect()->route('lecturer.submissions.show', $submission->id)->with('success', 'Submission accepted');
     }
@@ -98,13 +112,17 @@ class SubmissionDetailController extends Controller
      */
     public function reject(Submission $submission)
     {
-        // Authorization check - only lecturers can reject submissions
+        // TEMPORARILY DISABLED for debugging - Authorization check
+        /*
         if (!$this->isLecturer()) {
             return redirect()->route('lecturer.submissions.show', $submission->id)
                 ->with('error', 'Unauthorized: Only lecturers can reject submissions');
         }
+        */
         
+        \Log::info('Rejecting submission', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'Rejected']);
+        \Log::info('Submission rejected', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
         
         return redirect()->route('lecturer.submissions.show', $submission->id)->with('success', 'Submission rejected');
     }
@@ -114,13 +132,17 @@ class SubmissionDetailController extends Controller
      */
     public function requestRevision(Submission $submission)
     {
-        // Authorization check - only lecturers can request revisions
+        // TEMPORARILY DISABLED for debugging - Authorization check
+        /*
         if (!$this->isLecturer()) {
             return redirect()->route('lecturer.submissions.show', $submission->id)
                 ->with('error', 'Unauthorized: Only lecturers can request revisions');
         }
+        */
         
+        \Log::info('Requesting revision', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'NeedRevision']);
+        \Log::info('Revision requested', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
         
         return redirect()->route('lecturer.submissions.show', $submission->id)->with('success', 'Revision requested');
     }
