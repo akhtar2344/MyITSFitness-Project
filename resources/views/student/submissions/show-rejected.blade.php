@@ -143,7 +143,7 @@
             <aside class="col-span-12 xl:col-span-4 rounded-2xl bg-white border shadow-sm p-6 h-full flex flex-col">
               <div class="flex items-center gap-2 font-semibold">
                 <img src="{{ asset('images/Private comment-icon.png') }}" class="w-5 h-5 object-contain shrink-0" alt="">
-                <span>Comments</span>
+                <span>Private Comments</span>
               </div>
 
               <div class="mt-4 flex-1 overflow-y-auto space-y-4 pr-1">

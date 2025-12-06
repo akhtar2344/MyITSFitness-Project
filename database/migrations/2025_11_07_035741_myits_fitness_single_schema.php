@@ -5,13 +5,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
+// FEATURE: Single comprehensive database migration for myITS Fitness application
 return new class extends Migration {
     public function up(): void
     {
-        // ---------- Extensions ----------
+        // FEATURE: PostgreSQL pgcrypto extension for UUID generation and encryption
         DB::statement("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
 
-        // ---------- ENUM Types ----------
+        // FEATURE: PostgreSQL custom ENUM types for type safety and data integrity
         DB::statement("DO $$
         BEGIN
           IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role') THEN
@@ -26,6 +27,7 @@ return new class extends Migration {
           END IF;
         END$$;");
 
+        // FEATURE: Submission status ENUM with specific values for workflow management
         DB::statement("DO $$
         BEGIN
           IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'submission_status') THEN
@@ -40,7 +42,7 @@ return new class extends Migration {
           END IF;
         END$$;");
 
-        // ---------- Trigger Function ----------
+        // FEATURE: PostgreSQL trigger function for automatic updated_at timestamp
         DB::unprepared(<<<'SQL'
         CREATE OR REPLACE FUNCTION public.set_updated_at() RETURNS trigger
         LANGUAGE plpgsql AS $$
@@ -51,8 +53,9 @@ return new class extends Migration {
         $$;
         SQL);
 
-        // ========== TABLES ==========
-        // user_account
+        // ========== FEATURE: Database tables with UUID primary keys and relationships ==========
+        
+        // FEATURE: User account table with role-based access and authentication data
         Schema::create('user_account', function (Blueprint $table) {
             $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
             $table->text('email')->unique();
@@ -65,7 +68,7 @@ return new class extends Migration {
         });
         DB::statement("ALTER TABLE public.user_account ALTER COLUMN role TYPE public.role USING role::public.role;");
 
-        // session
+        // FEATURE: Session management table for user authentication tokens
         Schema::create('session', function (Blueprint $table) {
             $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
             $table->uuid('user_id');
@@ -81,7 +84,7 @@ return new class extends Migration {
             $table->index('user_id', 'idx_session_user');
         });
 
-        // student
+        // FEATURE: Student profile table with NRP and academic program data
         Schema::create('student', function (Blueprint $table) {
             $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
             $table->uuid('user_id')->unique();

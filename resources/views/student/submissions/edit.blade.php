@@ -196,6 +196,7 @@
                     </div>
                   </div>
                 </label>
+                <!-- FEATURE: Hidden file input with MIME type validation for certificates -->
                 <input id="certInput" type="file" accept="image/png,image/jpeg" class="hidden">
               </div>
             </div>
@@ -212,6 +213,7 @@
                   </div>
                 </div>
               </label>
+              <!-- FEATURE: Hidden file input with image validation for proof uploads -->
               <input id="proofInput" type="file" accept="image/png,image/jpeg" class="hidden">
               <p class="mt-2 text-xs italic text-rose-700">
                 Notes: Upload a clear activity photo with the timestamp visible.

@@ -184,10 +184,12 @@
     </div>
   </main>
 
-  {{-- Modal: Cancel Submission --}}
+  {{-- FEATURE: Cancel submission confirmation modal with backdrop and centered design --}}
   <div id="cancelModal" class="hidden fixed inset-0 z-[100]">
+    <!-- FEATURE: Semi-transparent backdrop overlay -->
     <div class="absolute inset-0 bg-black/60"></div>
     <div class="relative h-full w-full flex items-center justify-center p-4">
+      <!-- FEATURE: Modal content container with rounded design and shadow -->
       <div class="w-[540px] max-w-full rounded-2xl bg-white shadow-2xl">
         <form id="cancelForm" method="POST" action="{{ isset($submission) ? route('student.submissions.cancel', $submission->id) : '#' }}" class="p-6 text-center">
           @csrf
@@ -195,6 +197,7 @@
           <h3 class="text-[22px] font-bold text-[#3b6bff] mb-4">Cancel this submission?</h3>
           <p class="text-slate-700 mb-6">Your current progress will not be saved.</p>
 
+          <!-- FEATURE: Two-column action buttons with visual separation -->
           <div class="grid grid-cols-2 divide-x">
             <button type="submit" id="confirmYes" class="py-3 font-semibold text-[#3b6bff] hover:bg-slate-50 transition">Yes, Cancel</button>
             <button type="button" id="confirmNo" class="py-3 font-semibold text-slate-900 hover:bg-slate-50 transition">No, Keep it</button>
@@ -204,7 +207,7 @@
     </div>
   </div>
 
-  {{-- Toast --}}
+  {{-- FEATURE: Toast notification system for user feedback --}}
   <div id="toast" class="hidden fixed bottom-6 right-6 z-[110] px-4 py-3 rounded-lg bg-slate-900 text-white shadow-lg">
     <span id="toastText" class="text-sm font-medium">Activity has been discarded.</span>
   </div>
@@ -232,7 +235,7 @@
       });
     })();
 
-    // Cancel modal logic with AJAX
+    // FEATURE: Cancel submission modal system with AJAX submission
     (function () {
       const openBtn  = document.getElementById('cancelBtn');
       const modal    = document.getElementById('cancelModal');
@@ -242,9 +245,11 @@
       const toastTxt = document.getElementById('toastText');
       const cancelForm = document.getElementById('cancelForm');
 
+      // FEATURE: Modal visibility toggle functions
       function openModal(){ modal.classList.remove('hidden'); }
       function closeModal(){ modal.classList.add('hidden'); }
 
+      // FEATURE: Toast notification system with success/error styling
       function showToast(msg, type = 'success') {
         toastTxt.textContent = msg;
         toast.className = `fixed top-4 right-4 px-4 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${
@@ -256,12 +261,12 @@
 
       openBtn?.addEventListener('click', openModal);
 
-      // No → close modal
+      // FEATURE: Cancel action - close modal without submission
       noBtn?.addEventListener('click', () => {
         closeModal();
       });
 
-      // Yes → AJAX POST to cancel submission
+      // FEATURE: Confirm action - AJAX POST with CSRF protection
       yesBtn?.addEventListener('click', async () => {
         closeModal();
         yesBtn.disabled = true;
@@ -297,7 +302,7 @@
         }
       });
 
-      // close on backdrop / Esc
+      // FEATURE: Backdrop click and ESC key modal closing functionality
       modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
       });
