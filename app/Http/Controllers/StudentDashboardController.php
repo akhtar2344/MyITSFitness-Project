@@ -25,12 +25,16 @@ class StudentDashboardController extends Controller
             return redirect()->route('login')->with('error', 'Student profile not found for current user');
         }
 
-        // Aggregate stats (all submissions, since canceled ones are deleted)
+        // FEATURE: Aggregate submission statistics for dashboard display
         $totalSubmissions = $student->submissions()->count();
         $pendingCount = $student->submissions()->where('status', 'Pending')->count();
+        // FEATURE: Accepted count calculation 
         $acceptedCount = $student->submissions()->where('status', 'Accepted')->count();
         // Note: DB enum uses 'NeedRevision'
         $needRevisionCount = $student->submissions()->where('status', 'NeedRevision')->count();
+        
+        // FEATURE: Generate SKEM points
+        // Example: $skemPoints = $acceptedCount; (currently hard-coded as "SKEM 4" in views)
 
         // Recent submissions (latest 5) dengan eager load
         $recentSubmissions = $student->submissions()

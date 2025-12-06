@@ -8,10 +8,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+// FEATURE: Lecturer account seeder for populating demo lecturer data with departments
 class LecturerAccountSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * FEATURE: Database seeding with predefined lecturer accounts across multiple departments
      */
     public function run(): void
     {

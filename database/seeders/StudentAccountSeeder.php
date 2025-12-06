@@ -8,10 +8,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+// FEATURE: Student account seeder for populating demo student data with authentication
 class StudentAccountSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * FEATURE: Database seeding with predefined student accounts and credentials
      */
     public function run(): void
     {

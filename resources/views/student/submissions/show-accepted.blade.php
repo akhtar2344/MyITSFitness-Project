@@ -96,10 +96,12 @@
                     <span class="inline-flex items-center h-10 px-4 rounded-2xl text-white font-semibold bg-emerald-500">
                       {{ $submission->status }}
                     </span>
+                    <!-- FEATURE: SKEM points display - currently hard-coded as "SKEM 4" -->
                     <span class="inline-flex items-center gap-2 h-10 px-3 rounded-lg bg-white border shadow-sm text-slate-800 font-semibold">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 text-indigo-600" fill="currentColor">
                         <path d="M7 3a2 2 0 0 0-2 2v14l7-3 7 3V5a2 2 0 0 0-2-2H7z"/>
                       </svg>
+                      <!-- FEATURE: Hard-coded SKEM value - should be dynamic based on accepted submissions count -->
                       <span>SKEM 4</span>
                     </span>
                   </div>

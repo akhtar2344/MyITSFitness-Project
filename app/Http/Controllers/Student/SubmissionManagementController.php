@@ -53,6 +53,7 @@ class SubmissionManagementController extends Controller
             'date' => 'required|date_format:d/m/Y',
             'duration' => 'required|integer|min:1',
             'place' => 'required|string|max:100',
+            // FEATURE: File upload validation with size limits and MIME type restrictions
             'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB
             'certificate_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
         ], [
@@ -93,11 +94,12 @@ class SubmissionManagementController extends Controller
                 'duration_minutes' => $validated['duration'],
             ]);
 
-            // Store proof image
+            // FEATURE: Secure file storage to public disk with organized directory structure
             if ($request->hasFile('proof_image')) {
                 $proofFile = $request->file('proof_image');
                 $proofPath = $proofFile->store('submissions/proofs', 'public');
                 
+                // FEATURE: File attachment metadata storage with size calculation
                 FileAttachment::create([
                     'submission_id' => $submission->id,
                     'file_name' => $proofFile->getClientOriginalName(),
@@ -107,7 +109,7 @@ class SubmissionManagementController extends Controller
                 ]);
             }
 
-            // Store certificate image if provided
+            // FEATURE: Optional certificate upload with separate directory structure
             if ($request->hasFile('certificate_image')) {
                 $certFile = $request->file('certificate_image');
                 $certPath = $certFile->store('submissions/certificates', 'public');

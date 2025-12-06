@@ -6,10 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\UserAccount;
 use Illuminate\Support\Facades\Hash;
 
+// FEATURE: Authentication controller handling login/logout and session management
 class AuthController extends Controller
 {
     /**
-     * Show login form
+     * FEATURE: Display login form view
      */
     public function showLogin()
     {
@@ -17,10 +18,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Process login
+     * FEATURE: Process user authentication with validation and session creation
      */
     public function processLogin(Request $request)
     {
+        // FEATURE: Input validation with custom error messages
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:1',
@@ -30,7 +32,7 @@ class AuthController extends Controller
             'password.required' => 'Password is required',
         ]);
 
-        // Find user by email
+        // FEATURE: Database user lookup by email
         $user = UserAccount::where('email', $validated['email'])->first();
 
         if (!$user) {
@@ -39,24 +41,24 @@ class AuthController extends Controller
                 ->withInput($request->only('email'));
         }
 
-        // Verify password
+        // FEATURE: Secure password verification using Hash facade
         if (!Hash::check($validated['password'], $user->password_hash)) {
             return back()
                 ->withErrors(['password' => 'Password is incorrect'])
                 ->withInput($request->only('email'));
         }
 
-        // Check if user is active
+        // FEATURE: Active user status verification
         if (!$user->is_active) {
             return back()
                 ->withErrors(['email' => 'Your account has been deactivated. Please contact administrator.'])
                 ->withInput($request->only('email'));
         }
 
-        // Store session/login info
+        // FEATURE: Session creation with user credentials and role
         session(['user_id' => $user->id, 'email' => $user->email, 'role' => $user->role]);
 
-        // Redirect based on role
+        // FEATURE: Role-based routing after successful authentication
         if ($user->role === 'Student') {
             return redirect()->route('student.dashboard')
                 ->with('success', 'Welcome back, Student!');
@@ -71,7 +73,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout
+     * FEATURE: User logout with session cleanup
      */
     public function logout()
     {
@@ -80,7 +82,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Login with MyITS (placeholder)
+     * FEATURE: MyITS OAuth integration placeholder for future SSO implementation
      */
     public function loginWithMyITS()
     {

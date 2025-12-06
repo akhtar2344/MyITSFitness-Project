@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | myITS Fitness</title>
 
-  {{-- Tailwind CDN --}}
+  {{-- FEATURE: Tailwind CSS framework integration for responsive design --}}
   <script src="https://cdn.tailwindcss.com"></script>
 
-  {{-- Font Poppins --}}
+  {{-- FEATURE: Google Fonts Poppins integration for consistent typography --}}
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -16,6 +16,7 @@
       font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
     }
 
+    /* FEATURE: Custom CSS animations for snackbar notifications - slideIn/slideOut effects */
     @keyframes slideIn {
       from {
         transform: translateX(400px);
@@ -38,6 +39,7 @@
       }
     }
 
+    /* FEATURE: Animation classes for toast notification system */
     .snackbar-enter {
       animation: slideIn 0.3s ease-in-out;
     }
@@ -49,9 +51,10 @@
 </head>
 
 <body class="bg-white text-slate-800">
+  <!-- FEATURE: Responsive two-column layout for login page - hidden illustration on mobile -->
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
 
-    {{-- Kiri: ilustrasi --}}
+    {{-- FEATURE: Login illustration panel - responsive visibility --}}
     <div class="hidden lg:flex items-end justify-center bg-[#f6f9ff]">
       <img
         src="{{ asset('images/login-illustration-lecturer.png') }}"
@@ -60,11 +63,11 @@
       />
     </div>
 
-    {{-- Kanan: form --}}
+    {{-- FEATURE: Login form container with responsive padding --}}
     <div class="flex items-center justify-center p-8 lg:p-16">
       <div class="w-full max-w-sm space-y-6">
 
-        {{-- Logo (besar dan di tengah) --}}
+        {{-- FEATURE: Centered logo display with branding text --}}
         <div class="flex flex-col items-center text-center">
           <img
             src="{{ asset('images/myitsfitness-logo.png.png') }}"
@@ -76,16 +79,17 @@
           </p>
         </div>
 
-        {{-- Greeting --}}
+        {{-- FEATURE: Welcome greeting with accent color branding --}}
         <div class="pt-2">
           <h2 class="text-2xl font-extrabold text-slate-900">
             Hi, <span class="text-[#2d6df6]">Welcome</span>
           </h2>
         </div>
 
-        {{-- Form --}}
+        {{-- FEATURE: Authentication form with CSRF protection and validation --}}
         <form action="{{ route('login.process') }}" method="POST" class="space-y-4">
           @csrf
+          <!-- FEATURE: Email input field with validation and error display -->
           <div>
             <label class="block text-sm font-medium mb-1">MyITS Email</label>
             <input
@@ -101,6 +105,7 @@
             @enderror
           </div>
 
+          <!-- FEATURE: Password field with toggle visibility and validation -->
           <div>
             <label class="block text-sm font-medium mb-1">Password</label>
             <div class="relative">
@@ -112,6 +117,7 @@
                 class="w-full border rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-[#2d6df6]/20 outline-none @error('password') border-red-500 @enderror"
                 required
               >
+              <!-- FEATURE: Password visibility toggle button with eye icon -->
               <button type="button" id="togglePassword" class="absolute right-3 top-2.5 text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" id="eyeIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -127,6 +133,7 @@
             @enderror
           </div>
 
+          <!-- FEATURE: Sign in button with hover effects and focus states -->
           <button
             type="submit"
             class="w-full bg-[#2d6df6] hover:bg-[#1f56d8] text-white font-semibold py-2.5 rounded-lg shadow-sm transition"
@@ -135,14 +142,14 @@
           </button>
         </form>
 
-        {{-- Divider --}}
+        {{-- FEATURE: Visual divider element with horizontal lines and "OR" text --}}
         <div class="flex items-center justify-center gap-3 text-slate-400 text-sm">
           <span class="block h-px bg-slate-200 w-16"></span>
           <span>OR</span>
           <span class="block h-px bg-slate-200 w-16"></span>
         </div>
 
-        {{-- Login with MyITS --}}
+        {{-- FEATURE: MyITS OAuth integration button (placeholder for future SSO) --}}
         <a
           href="{{ route('login.myits') }}"
           class="w-full flex items-center justify-center gap-2 border rounded-lg py-2.5 text-slate-700 hover:bg-slate-50 transition"
@@ -154,11 +161,11 @@
     </div>
   </div>
 
-  {{-- Snackbar Container --}}
+  {{-- FEATURE: Toast notification container for login feedback messages --}}
   <div id="snackbarContainer" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
 
   <script>
-    // Password toggle functionality
+    // FEATURE: Password visibility toggle functionality with eye icon switching
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
     const eyeIcon = document.querySelector('#eyeIcon');
