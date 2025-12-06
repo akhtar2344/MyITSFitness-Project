@@ -12,7 +12,7 @@ class SubmissionDetailController extends Controller
     /**
      * Display the submission detail page (for lecturer)
      */
-    public function show($submissionId)
+    public function openSubmissionDetailPage($submissionId)
     {
         $submission = Submission::with(['student', 'activity', 'fileAttachments', 'comments'])
             ->findOrFail($submissionId);
