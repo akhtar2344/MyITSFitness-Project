@@ -167,7 +167,7 @@
 
     const norm = (s) => (s || '').toLowerCase().trim();
 
-    function scoreRow(row, q){
+    function searchStudentKeyword(row, q){
       if (!q) return -1;
       const name = norm(row.querySelector('td:nth-child(1)').innerText);
       const nrp  = norm(row.querySelector('td:nth-child(2)').innerText);
@@ -186,7 +186,7 @@
       return score;
     }
 
-    function applyFilter(){
+    function handleSearchEvent(){
       const q = norm(input.value);
       const hasValue = q.length > 0;
 
@@ -203,7 +203,7 @@
 
       // Search with ranking
       const ranked = rows.map(r => {
-        const s = scoreRow(r, q);
+        const s = searchStudentKeyword(r, q);
         const visible = s > 0;
         r.style.display = visible ? '' : 'none';
         return { el: r, s };
@@ -214,11 +214,11 @@
     }
 
     // Search interactions
-    input.addEventListener('input', applyFilter);
+    input.addEventListener('input', handleSearchEvent);
     button.addEventListener('click', () => {
       if (input.value.trim() !== '') {
         input.value = '';
-        applyFilter();
+        handleSearchEvent();
         input.focus();
       } else {
         input.focus();
