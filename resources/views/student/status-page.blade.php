@@ -223,6 +223,21 @@
 
                 </tbody>
               </table>
+              
+              {{-- Empty state when filter results are empty --}}
+              <div id="emptyState" class="hidden px-8 py-12 text-center text-slate-500">
+                <div class="space-y-3">
+                  <div class="mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-lg font-medium text-slate-600">No submissions found</p>
+                    <p class="text-sm text-slate-400 mt-1">Try adjusting your search or filter criteria</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -276,6 +291,7 @@
       const q = norm(input.value);
       const picked = filter.value;
       const hasValue = q.length > 0;
+      const emptyState = document.getElementById('emptyState');
 
       icon.src = hasValue ? eraseIcon : searchIcon;
       button.title = hasValue ? 'Clear' : 'Search';
@@ -287,20 +303,31 @@
         r.dataset.statusOk = statusOk ? '1' : '0';
       });
 
+      let visibleCount = 0;
+
       if (!hasValue){
-        rows.forEach(r => r.style.display = (r.dataset.statusOk === '1') ? '' : 'none');
-        return;
+        rows.forEach(r => {
+          const shouldShow = r.dataset.statusOk === '1';
+          r.style.display = shouldShow ? '' : 'none';
+          if (shouldShow) visibleCount++;
+        });
+      } else {
+        const ranked = rows.map(r => {
+          const s = scoreRow(r, q);
+          const visible = (s > 0) && (r.dataset.statusOk === '1');
+          r.style.display = visible ? '' : 'none';
+          if (visible) visibleCount++;
+          return { el: r, s };
+        }).filter(x => x.s > 0 && x.el.style.display !== 'none');
+
+        ranked.sort((a,b) => b.s - a.s || (+a.el.dataset.idx - +b.el.dataset.idx));
+        ranked.forEach(x => tbody.appendChild(x.el));
       }
 
-      const ranked = rows.map(r => {
-        const s = scoreRow(r, q);
-        const visible = (s > 0) && (r.dataset.statusOk === '1');
-        r.style.display = visible ? '' : 'none';
-        return { el: r, s };
-      }).filter(x => x.s > 0 && x.el.style.display !== 'none');
-
-      ranked.sort((a,b) => b.s - a.s || (+a.el.dataset.idx - +b.el.dataset.idx));
-      ranked.forEach(x => tbody.appendChild(x.el));
+      // Show/hide empty state based on visible rows
+      if (emptyState) {
+        emptyState.classList.toggle('hidden', visibleCount > 0);
+      }
     }
 
     input.addEventListener('input', applyFilter);
