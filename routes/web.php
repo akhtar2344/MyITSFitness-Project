@@ -45,28 +45,6 @@ Route::prefix('student')->name('student.')->group(function () {
     // FEATURE: Dynamic submission detail routes with parameter binding
     Route::get('/submissions/{submission}/view', [StudentSubmissionDetailController::class, 'openDetailPage'])->name('submissions.show');
 
-    // FEATURE: Static activity detail routes for UI demonstration
-    Route::view('/activity/harry/pending', 'student.activity.show-pending')->name('activity.show.pending');
-    Route::view('/activity/harry/accepted', 'student.activity.show-accepted')->name('activity.show.accepted');
-    Route::view('/activity/harry/need-revision', 'student.activity.show-needrevision')->name('activity.show.needrevision');
-
-    // ===== Edit & Re-submit form =====
-    Route::view('/activity/harry/edit', 'student.activity.edit-resubmit')->name('activity.edit');
-
-    // ===== Resubmit handler (dummy) =====
-    Route::post('/activity/harry/resubmit', function () {
-        return redirect()
-            ->route('student.activity.show.pending')
-            ->with('resubmitted', true);
-    })->name('activity.resubmit');
-
-    // Optional previews
-    Route::get('/show', function () {
-        $student = ['name' => 'Benedict', 'program' => 'Biologi', 'status' => 'Accepted'];
-        $id = '5026231006';
-        return view('student.show', compact('student', 'id'));
-    })->name('show.test');
-
     // FEATURE: Dynamic submission management routes with form handling
     Route::get('/submissions/edit', [SubmissionManagementController::class, 'openSubmissionPage'])->name('submissions.edit');
     Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
