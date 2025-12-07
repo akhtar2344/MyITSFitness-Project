@@ -13,6 +13,6 @@ class StudentListController extends Controller
     public function navigateToStudents()
     {
         $students = Student::orderBy('name', 'asc')->get();
-        return view('lecturer.index', compact('students'));
+        return view('lecturer.students', compact('students'));
     }
 }
