@@ -86,7 +86,7 @@ Route::prefix('student')->name('student.')->group(function () {
 |--------------------------------------------------------------*/
 Route::prefix('lecturer')->name('lecturer.')->group(function () {
     // FEATURE: Lecturer home page with student list display
-    Route::get('/', [StudentListController::class, 'navigateToStudents'])->name('index');
+    Route::get('/', [StudentListController::class, 'navigateToStudents'])->name('students');
 
     // FEATURE: Lecturer dashboard with statistics and data visualization
     Route::get('/dashboard', [LecturerDashboardController::class, 'viewDashboard'])->name('dashboard');
