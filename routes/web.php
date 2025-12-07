@@ -17,8 +17,8 @@ use App\Models\Comment;
 /* =============================================================
    FEATURE: Authentication routes with unified login system
    ============================================================= */
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process');
+Route::get('/login', [AuthController::class, 'openLoginPage'])->name('login');
+Route::post('/login', [AuthController::class, 'loginReady'])->name('login.process');
 // FEATURE: MyITS SSO integration placeholder route
 Route::get('/login/myits', [AuthController::class, 'loginWithMyITS'])->name('login.myits');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -26,7 +26,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 /* =============================================================
    FEATURE: Student dashboard with role-based access
    ============================================================= */
-Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
+Route::get('/student/dashboard', [StudentDashboardController::class, 'openHomePage'])->name('student.dashboard');
 
 /*
 |--------------------------------------------------------------------------
@@ -68,7 +68,7 @@ Route::prefix('student')->name('student.')->group(function () {
     })->name('show.test');
 
     // FEATURE: Dynamic submission management routes with form handling
-    Route::get('/submissions/edit', [SubmissionManagementController::class, 'edit'])->name('submissions.edit');
+    Route::get('/submissions/edit', [SubmissionManagementController::class, 'openSubmissionPage'])->name('submissions.edit');
     Route::post('/submissions', [SubmissionManagementController::class, 'store'])->name('submissions.store');
     Route::post('/submissions/{submission}/cancel', [SubmissionManagementController::class, 'cancel'])->name('submissions.cancel');
     Route::get('/submissions/{submission}/resubmit', [SubmissionManagementController::class, 'beginRevision'])->name('submissions.resubmit');
