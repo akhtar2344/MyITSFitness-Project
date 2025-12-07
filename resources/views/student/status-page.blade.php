@@ -142,7 +142,7 @@
                     </button>
                   </li>
                   <li>
-                    <button data-value="Need Revision" class="filter-opt w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50">
+                    <button data-value="NeedRevision" class="filter-opt w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50">
                       <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                       <span class="flex-1 text-left">Need Revision</span>
                       <svg class="check hidden h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 5.29a1 1 0 010 1.414l-7.01 7.01a1 1 0 01-1.414 0l-3.3-3.3a1 1 0 111.414-1.414l2.593 2.594 6.303-6.303a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
@@ -346,7 +346,7 @@
       'All': 'bg-slate-400',
       'Pending': 'bg-blue-500',
       'Accepted': 'bg-emerald-500',
-      'Need Revision': 'bg-amber-500',
+      'NeedRevision': 'bg-amber-500',
       'Rejected': 'bg-rose-500'
     };
 

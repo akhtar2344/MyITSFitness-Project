@@ -18,7 +18,7 @@ class StudentStatusController extends Controller
 
         // Ambil submission history student dengan status history
         $submissions = Submission::where('student_id', $student->id)
-            ->with(['activity', 'statusHistories'])
+            ->with(['activity'])
             ->orderBy('created_at', 'desc')
             ->get();
 
