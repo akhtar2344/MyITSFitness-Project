@@ -53,7 +53,7 @@
               <img src="{{ asset('images/submission-page.png') }}" class="w-6 h-6" alt="">
               <span class="font-semibold text-slate-900">Submission</span>
             </a>
-            <a href="{{ route('lecturer.index') }}#" class="flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm hover:bg-slate-50">
+            <a href="{{ route('lecturer.students') }}#" class="flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm hover:bg-slate-50">
               <img src="{{ asset('images/student-navigator-page-icon.png') }}" class="h-6 w-auto object-contain" alt="">
               <span class="font-medium">Students</span>
             </a>

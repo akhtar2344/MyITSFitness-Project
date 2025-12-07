@@ -8,11 +8,11 @@ use App\Models\Student;
 class StudentListController extends Controller
 {
     /**
-     * Display a listing of all students.
+     * Navigate to students page and display a listing of all students.
      */
-    public function index()
+    public function navigateToStudents()
     {
         $students = Student::orderBy('name', 'asc')->get();
-        return view('lecturer.index', compact('students'));
+        return view('lecturer.students', compact('students'));
     }
 }

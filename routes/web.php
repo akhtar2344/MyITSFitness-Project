@@ -86,13 +86,13 @@ Route::prefix('student')->name('student.')->group(function () {
 |--------------------------------------------------------------*/
 Route::prefix('lecturer')->name('lecturer.')->group(function () {
     // FEATURE: Lecturer home page with student list display
-    Route::get('/', [StudentListController::class, 'index'])->name('index');
+    Route::get('/', [StudentListController::class, 'navigateToStudents'])->name('students');
 
     // FEATURE: Lecturer dashboard with statistics and data visualization
     Route::get('/dashboard', [LecturerDashboardController::class, 'viewDashboard'])->name('dashboard');
 
     // FEATURE: Student management routes for lecturer interface
-    Route::get('/students', [StudentListController::class, 'index'])->name('students.index');
+    Route::get('/students', [StudentListController::class, 'navigateToStudents'])->name('students.index');
 
     // FEATURE: Submission review route with grading functionality
     Route::get('/submissions/{submission}', [SubmissionDetailController::class, 'openSubmissionDetailPage'])->name('submissions.show');
