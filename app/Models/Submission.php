@@ -55,10 +55,11 @@ class Submission extends Model
         return $this->hasMany(RevisionRequest::class, 'submission_id');
     }
 
-    public function statusHistories()
-    {
-        return $this->hasMany(StatusHistory::class, 'submission_id');
-    }
+    // FEATURE: Remove unused status history relationship as table is being dropped
+    // public function statusHistories()
+    // {
+    //     return $this->hasMany(StatusHistory::class, 'submission_id');
+    // }
 
     public function notifications()
     {
