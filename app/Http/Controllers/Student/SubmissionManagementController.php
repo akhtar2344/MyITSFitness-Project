@@ -18,7 +18,15 @@ class SubmissionManagementController extends Controller
     /**
      * Show submission form (GET /student/submissions/edit?activity=Basketball)
      */
-    public function edit(Request $request)
+    public function openSubmissionPage(Request $request)
+    {
+        return $this->submissionView($request);
+    }
+
+    /**
+     * FEATURE: Render submission form view for activity details entry
+     */
+    public function submissionView(Request $request)
     {
         $activityName = $request->query('activity', '');
         
@@ -36,41 +44,87 @@ class SubmissionManagementController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate submission data
+        $validationResult = $this->validateSubmission($request);
+        if (!$validationResult['success']) {
+            return $validationResult['response'];
+        }
+
+        $validated = $validationResult['data'];
+
         // Get current logged-in student
         $studentId = session('user_id');
         
         if (!$studentId) {
-            return redirect()->route('login')
-                ->with('error', 'Please login first');
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login first',
+            ], 401);
         }
 
-        // Get student record
         $student = Student::where('user_id', $studentId)->firstOrFail();
 
-        // Validate request
-        $validated = $request->validate([
-            'activity_name' => 'required|string|max:100',
-            'date' => 'required|date_format:d/m/Y',
-            'duration' => 'required|integer|min:1',
-            'place' => 'required|string|max:100',
-            // FEATURE: File upload validation with size limits and MIME type restrictions
-            'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB
-            'certificate_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
-        ], [
-            'activity_name.required' => 'Activity name is required',
-            'date.required' => 'Date of occurrence is required',
-            'date.date_format' => 'Date must be in dd/mm/yyyy format',
-            'duration.required' => 'Duration is required',
-            'duration.min' => 'Duration must be at least 1 minute',
-            'place.required' => 'Place of issue is required',
-            'proof_image.required' => 'Activity proof image is required',
-            'proof_image.image' => 'Proof must be an image',
-            'proof_image.mimes' => 'Proof must be JPEG or PNG',
-            'proof_image.max' => 'Proof must not exceed 10MB',
-        ]);
+        // Prepare and submit activity
+        $activityResult = $this->submitActivity($validated);
+        if (!$activityResult['success']) {
+            return $activityResult['response'];
+        }
 
+        $activity = $activityResult['activity'];
+
+        // Store submission to database
+        return $this->storeSubmission($request, $student, $activity, $validated);
+    }
+
+    /**
+     * FEATURE: Validate submission form data and file uploads
+     */
+    private function validateSubmission(Request $request)
+    {
         try {
-            // Find or create activity
+            $validated = $request->validate([
+                'activity_name' => 'required|string|max:100',
+                'date' => 'required|date_format:d/m/Y',
+                'duration' => 'required|integer|min:1',
+                'place' => 'required|string|max:100',
+                // FEATURE: File upload validation with size limits and MIME type restrictions
+                'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB
+                'certificate_image' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+            ], [
+                'activity_name.required' => 'Activity name is required',
+                'date.required' => 'Date of occurrence is required',
+                'date.date_format' => 'Date must be in dd/mm/yyyy format',
+                'duration.required' => 'Duration is required',
+                'duration.min' => 'Duration must be at least 1 minute',
+                'place.required' => 'Place of issue is required',
+                'proof_image.required' => 'Activity proof image is required',
+                'proof_image.image' => 'Proof must be an image',
+                'proof_image.mimes' => 'Proof must be JPEG or PNG',
+                'proof_image.max' => 'Proof must not exceed 10MB',
+            ]);
+
+            return [
+                'success' => true,
+                'data' => $validated
+            ];
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return [
+                'success' => false,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $e->errors()
+                ], 422)
+            ];
+        }
+    }
+
+    /**
+     * FEATURE: Find or create activity and prepare submission data
+     */
+    private function submitActivity($validated)
+    {
+        try {
             $activity = Activity::where('name', $validated['activity_name'])->first();
             
             if (!$activity) {
@@ -85,6 +139,27 @@ class SubmissionManagementController extends Controller
                 ]);
             }
 
+            return [
+                'success' => true,
+                'activity' => $activity
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Error preparing activity: ' . $e->getMessage(),
+                ], 500)
+            ];
+        }
+    }
+
+    /**
+     * FEATURE: Persist submission and file attachments to database
+     */
+    private function storeSubmission(Request $request, Student $student, Activity $activity, $validated)
+    {
+        try {
             // Create submission
             $submission = Submission::create([
                 'student_id' => $student->id,

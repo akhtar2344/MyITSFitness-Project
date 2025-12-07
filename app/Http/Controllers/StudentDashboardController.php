@@ -10,7 +10,15 @@ class StudentDashboardController extends Controller
     /**
      * Display the student dashboard.
      */
-    public function index(Request $request)
+    public function openHomePage(Request $request)
+    {
+        return $this->homeView($request);
+    }
+
+    /**
+     * FEATURE: Generate and display dashboard view with student data
+     */
+    public function homeView(Request $request)
     {
         // Determine logged-in user via session (set by AuthController)
         $userId = session('user_id');
