@@ -12,7 +12,7 @@ class AuthController extends Controller
     /**
      * FEATURE: Display login form view
      */
-    public function showLogin()
+    public function openLoginPage()
     {
         return view('auth.login');
     }
@@ -20,7 +20,7 @@ class AuthController extends Controller
     /**
      * FEATURE: Process user authentication with validation and session creation
      */
-    public function processLogin(Request $request)
+    public function loginReady(Request $request)
     {
         // FEATURE: Input validation with custom error messages
         $validated = $request->validate([
