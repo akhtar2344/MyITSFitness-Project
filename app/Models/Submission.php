@@ -17,14 +17,14 @@ class Submission extends Model
     protected $fillable = [
         'student_id',
         'activity_id',
+        'name', // Activity category name
         'status',
-        'notes',
-        'canceled_at',
         'duration_minutes',
+        'location',
+        'date',
     ];
 
     protected $casts = [
-        'canceled_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

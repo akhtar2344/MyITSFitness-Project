@@ -58,6 +58,9 @@ class AuthController extends Controller
         // FEATURE: Session creation with user credentials and role
         session(['user_id' => $user->id, 'email' => $user->email, 'role' => $user->role]);
 
+        // FEATURE: Update last login timestamp for user tracking
+        $user->update(['last_login_at' => now()]);
+
         // FEATURE: Role-based routing after successful authentication
         if ($user->role === 'Student') {
             return redirect()->route('student.dashboard')

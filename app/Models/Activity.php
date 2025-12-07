@@ -13,18 +13,10 @@ class Activity extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false; // Disable timestamps
 
     protected $fillable = [
-        'name',
-        'date',
-        'location',
-        'duration_minutes',
-    ];
-
-    protected $casts = [
-        'date' => 'date',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'name', // Only category name, nothing else
     ];
 
     // Relationships

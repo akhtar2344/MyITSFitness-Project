@@ -30,10 +30,11 @@ class UserAccount extends Model
     ];
 
     // Relationships
-    public function sessions()
-    {
-        return $this->hasMany(Session::class, 'user_id');
-    }
+    // Remove session relationship since table is dropped
+    // public function sessions()
+    // {
+    //     return $this->hasMany(Session::class, 'user_id');
+    // }
 
     public function student()
     {
@@ -45,8 +46,9 @@ class UserAccount extends Model
         return $this->hasOne(Lecturer::class, 'user_id');
     }
 
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'recipient_user_id');
-    }
+    // Remove notification relationship since table is dropped
+    // public function notifications()
+    // {
+    //     return $this->hasMany(Notification::class, 'recipient_user_id');
+    // }
 }

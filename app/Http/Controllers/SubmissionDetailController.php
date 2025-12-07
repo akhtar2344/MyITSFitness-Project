@@ -108,6 +108,15 @@ class SubmissionDetailController extends Controller
         
         \Log::info('Accepting submission', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'Accepted']);
+        
+        // If this submission had revision requests, mark them as resolved
+        if ($submission->status === 'NeedRevision' || $submission->revisionRequests()->exists()) {
+            $submission->revisionRequests()->whereNull('resolved_at')->update([
+                'resolved_at' => now()
+            ]);
+            \Log::info('Revision requests resolved', ['submission_id' => $submission->id]);
+        }
+        
         \Log::info('Submission accepted', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
         
         return redirect()->route('lecturer.submissions.show', $submission->id)->with('success', 'Submission accepted');
@@ -134,6 +143,15 @@ class SubmissionDetailController extends Controller
         
         \Log::info('Rejecting submission', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
         $submission->update(['status' => 'Rejected']);
+        
+        // If this submission had revision requests, mark them as resolved (rejected)
+        if ($submission->revisionRequests()->exists()) {
+            $submission->revisionRequests()->whereNull('resolved_at')->update([
+                'resolved_at' => now()
+            ]);
+            \Log::info('Revision requests resolved (rejected)', ['submission_id' => $submission->id]);
+        }
+        
         \Log::info('Submission rejected', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
         
         return redirect()->route('lecturer.submissions.show', $submission->id)->with('success', 'Submission rejected');
@@ -159,7 +177,35 @@ class SubmissionDetailController extends Controller
         }
         
         \Log::info('Requesting revision', ['submission_id' => $submission->id, 'old_status' => $submission->status]);
+        
+        // Update submission status
         $submission->update(['status' => 'NeedRevision']);
+        
+        // Debug: Get lecturer ID from session
+        $userId = session('user_id');
+        \Log::info('Session user_id', ['user_id' => $userId]);
+        
+        // Get lecturer from user_id
+        $lecturer = \App\Models\Lecturer::where('user_id', $userId)->first();
+        \Log::info('Found lecturer', ['lecturer' => $lecturer ? $lecturer->id : 'NOT FOUND']);
+        
+        if ($lecturer) {
+            // Create revision request record
+            try {
+                $revisionRequest = \App\Models\RevisionRequest::create([
+                    'submission_id' => $submission->id,
+                    'lecturer_id' => $lecturer->id, // Use lecturer ID, not user ID
+                    'message' => 'Please revise your submission',
+                    'created_at' => now(),
+                ]);
+                \Log::info('RevisionRequest created', ['id' => $revisionRequest->id]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to create RevisionRequest', ['error' => $e->getMessage()]);
+            }
+        } else {
+            \Log::error('No lecturer found for user_id', ['user_id' => $userId]);
+        }
+        
         \Log::info('Revision requested', ['submission_id' => $submission->id, 'new_status' => $submission->fresh()->status]);
         
         return redirect()->route('lecturer.submissions.show', $submission->id)->with('success', 'Revision requested');

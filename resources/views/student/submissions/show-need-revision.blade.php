@@ -113,7 +113,7 @@
                   <div class="font-medium">{{ $activity->name ?? '—' }}</div>
                   
                   <div class="text-slate-500">Location:</div>
-                  <div class="font-medium">{{ $activity->location ?? '—' }}</div>
+                  <div class="font-medium">{{ $submission->location ?? '—' }}</div>
                   
                   <div class="text-slate-500">Duration:</div>
                   <div class="font-medium">{{ round(($submission->duration_minutes ?? 0) / 60, 2) }} Hours</div>
