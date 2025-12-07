@@ -215,7 +215,7 @@
                           </div>
                           <div class="border-l pl-4">
                             <div class="text-slate-500 text-sm">Location</div>
-                            <div class="font-semibold">{{ $activity->location ?? '—' }}</div>
+                            <div class="font-semibold">{{ $submission->location ?? '—' }}</div>
                           </div>
                           <div class="border-l pl-4">
                             <div class="text-slate-500 text-sm">Status</div>

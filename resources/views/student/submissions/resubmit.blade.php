@@ -90,7 +90,7 @@
 @php
   // Get activity name without overwriting the activity object
   $activityName = $activity->name ?? 'Activity';
-  $activityLocation = $activity->location ?? 'N/A';
+  $activityLocation = $submission->location ?? 'N/A';
   $isOther = in_array(strtolower($activityName), ['other','others']);
   
   // Map ikon untuk judul (kecuali Other)
@@ -200,7 +200,7 @@
               <div class="mt-6">
                 <label class="block text-sm font-semibold text-slate-600">Place of Issue</label>
                 <input type="text" placeholder="ex: KONI" disabled
-                       value="{{ $activity->location ?? 'N/A' }}"
+                       value="{{ $submission->location ?? 'N/A' }}"
                        class="mt-2 w-full rounded-xl border border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 px-4 py-3 text-slate-500 bg-slate-50 cursor-not-allowed"/>
               </div>
 

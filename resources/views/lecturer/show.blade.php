@@ -131,7 +131,7 @@
                 <div class="mt-6 grid grid-cols-2 gap-y-3 text-sm md:text-base">
                   <div class="text-slate-500">Submitted:</div><div class="font-medium">{{ $submission->created_at->format('M d, Y') }}</div>
                   <div class="text-slate-500">Activity:</div><div class="font-medium">{{ $submission->activity->name ?? 'N/A' }}</div>
-                  <div class="text-slate-500">Location:</div><div class="font-medium">{{ $submission->activity->location ?? 'N/A' }}</div>
+                  <div class="text-slate-500">Location:</div><div class="font-medium">{{ $submission->location ?? 'N/A' }}</div>
                   <div class="text-slate-500">Duration:</div><div class="font-medium">{{ round(($submission->duration_minutes ?? 0) / 60, 2) }} Hours</div>
                 </div>
 

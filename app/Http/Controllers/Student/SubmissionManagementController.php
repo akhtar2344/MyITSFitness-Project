@@ -125,19 +125,8 @@ class SubmissionManagementController extends Controller
     private function submitActivity($validated)
     {
         try {
-            $activity = Activity::where('name', $validated['activity_name'])->first();
-            
-            if (!$activity) {
-                // Parse date from dd/mm/yyyy format
-                $dateFormatted = \DateTime::createFromFormat('d/m/Y', $validated['date']);
-                
-                $activity = Activity::create([
-                    'name' => $validated['activity_name'],
-                    'date' => $dateFormatted->format('Y-m-d'),
-                    'location' => $validated['place'],
-                    'duration_minutes' => $validated['duration'],
-                ]);
-            }
+            // Find or create activity by name only (pure category storage)
+            $activity = Activity::firstOrCreate(['name' => $validated['activity_name']]);
 
             return [
                 'success' => true,
@@ -160,13 +149,15 @@ class SubmissionManagementController extends Controller
     private function storeSubmission(Request $request, Student $student, Activity $activity, $validated)
     {
         try {
-            // Create submission
+            // Create submission with all details
             $submission = Submission::create([
                 'student_id' => $student->id,
                 'activity_id' => $activity->id,
+                'name' => $validated['activity_name'], // Store category name in submission
                 'status' => 'Pending',
-                'notes' => null,
                 'duration_minutes' => $validated['duration'],
+                'location' => $validated['place'],
+                'date' => \DateTime::createFromFormat('d/m/Y', $validated['date'])->format('Y-m-d'),
             ]);
 
             // FEATURE: Secure file storage to public disk with organized directory structure
