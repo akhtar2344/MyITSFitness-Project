@@ -40,6 +40,10 @@ class StudentDashboardController extends Controller
         $acceptedCount = $student->submissions()->where('status', 'Accepted')->count();
         // Note: DB enum uses 'NeedRevision'
         $needRevisionCount = $student->submissions()->where('status', 'NeedRevision')->count();
+        $rejectedCount = $student->submissions()->where('status', 'Rejected')->count();
+        // FEATURE: Rejected count for comprehensive dashboard statistics
+        $rejectedCount = $student->submissions()->where('status', 'Rejected')->count();
+        $rejectedCount = $student->submissions()->where('status', 'Rejected')->count();
         
         // FEATURE: Generate SKEM points
         // Example: $skemPoints = $acceptedCount; (currently hard-coded as "SKEM 4" in views)
@@ -57,6 +61,7 @@ class StudentDashboardController extends Controller
             'pendingCount' => $pendingCount,
             'acceptedCount' => $acceptedCount,
             'needRevisionCount' => $needRevisionCount,
+            'rejectedCount' => $rejectedCount,
             'recentSubmissions' => $recentSubmissions,
         ]);
     }
