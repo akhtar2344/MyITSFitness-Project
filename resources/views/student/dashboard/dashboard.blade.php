@@ -30,6 +30,84 @@
       transition: opacity .28s ease;
     }
     .group:hover .hover-glow { opacity:.28; } /* ~28% transparansi */
+
+    /* Dashboard responsive improvements */
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .chart-container canvas {
+        width: 80px !important;
+        height: 80px !important;
+      }
+      .status-summary {
+        padding: 0.5rem;
+      }
+      .status-card {
+        padding: 0.5rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .chart-container {
+        padding: 0.25rem;
+      }
+      .chart-container canvas {
+        width: 70px !important;
+        height: 70px !important;
+      }
+      .status-summary {
+        padding: 0.5rem;
+        height: auto !important;
+      }
+      .status-card {
+        padding: 0.5rem;
+      }
+      .status-card .text-lg {
+        font-size: 1rem;
+      }
+      .status-card .text-sm {
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .chart-container canvas {
+        width: 60px !important;
+        height: 60px !important;
+      }
+      .chart-container .text-lg {
+        font-size: 1rem;
+      }
+      .chart-container .text-xl {
+        font-size: 1.25rem;
+      }
+    }
+
+    /* Chart container styling - compact version */
+    .chart-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      min-height: 140px;
+    }
+
+    /* Horizontal status cards styling */
+    .horizontal-status-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .horizontal-status-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
   </style>
 </head>
 
@@ -85,10 +163,10 @@
   </script>
 
   <main>
-    <div class="max-w-7xl mx-auto px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-6">
 
       <!-- GRID DUA KOLOM -->
-      <div class="grid gap-8 md:grid-cols-[260px,1fr]">
+      <div class="grid gap-6 md:grid-cols-[240px,1fr]">
 
         {{-- Sidebar --}}
         <aside>
@@ -122,46 +200,64 @@
                 Hi, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5b83ff] to-[#7b61ff]">{{ $student->name ?? 'Student' }}</span>
               </h1>
 
-              {{-- Statistik --}}
-              <div class="mt-5 rounded-2xl bg-white border shadow-sm px-6 py-6 eqH flex items-center">
-                <div class="grid grid-cols-4 gap-4 sm:gap-6 w-full justify-items-center">
+              {{-- Statistik Dashboard - 3 Column Layout --}}
+              <div class="mt-5 rounded-2xl bg-white border shadow-sm px-3 py-3 eqH">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center h-full">
 
-                  {{-- Chart SKEM --}}
-                  <div class="flex flex-col items-center">
-                    <canvas id="skemChart" width="68" height="68"></canvas>
+                  {{-- Overall Status Pie Chart --}}
+                  <div class="chart-container">
+                    <div class="relative">
+                      <canvas id="overallChart" width="100" height="100"></canvas>
+                    </div>
                     <div class="mt-2 text-center">
-                      <div class="text-lg font-semibold">{{ $totalSubmissions }}</div>
-                      <div class="text-xs text-slate-500">Activity</div>
+                      <div class="text-base font-semibold text-slate-700">{{ $totalSubmissions }}</div>
+                      <div class="text-xs text-slate-500">Overall Submissions</div>
                     </div>
                   </div>
 
-                  {{-- Widget Pending --}}
-                  <div class="flex flex-col items-center">
-                      <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span class="text-blue-600 font-semibold text-lg">{{ $pendingCount }}</span>
+                  {{-- Accepted Progress (Donut Chart) --}}
+                  <div class="chart-container">
+                    <div class="relative">
+                      <canvas id="acceptedChart" width="100" height="100"></canvas>
+                      {{-- Center text for donut chart --}}
+                      <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <div class="text-lg font-bold text-emerald-600">{{ $acceptedCount }}</div>
+                        <div class="text-xs text-slate-500">/ 32</div>
+                      </div>
                     </div>
                     <div class="mt-2 text-center">
-                      <div class="text-xs text-slate-500">Pending</div>
+                      <div class="text-sm font-semibold text-emerald-600">{{ $acceptedCount > 0 ? round(($acceptedCount/32)*100, 1) : 0 }}% Complete</div>
+                      <div class="text-xs text-slate-500">Accepted Activities</div>
                     </div>
                   </div>
 
-                  {{-- Widget Accepted --}}
-                  <div class="flex flex-col items-center">
-                      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                      <span class="text-green-600 font-semibold text-lg">{{ $acceptedCount }}</span>
+                  {{-- Status Summary - Vertical Cards --}}
+                  <div class="space-y-2 flex flex-col justify-center">
+                    {{-- Pending --}}
+                    <div class="status-card bg-white rounded-lg p-2 border border-blue-100 flex items-center justify-between hover:shadow-md transition-shadow">
+                      <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></div>
+                        <span class="text-sm font-medium text-slate-700 leading-tight">Pending</span>
+                      </div>
+                      <div class="text-lg font-bold text-blue-600">{{ $pendingCount }}</div>
                     </div>
-                    <div class="mt-2 text-center">
-                      <div class="text-xs text-slate-500">Accepted</div>
+                    
+                    {{-- Need Revision --}}
+                    <div class="status-card bg-white rounded-lg p-2 border border-amber-100 flex items-center justify-between hover:shadow-md transition-shadow">
+                      <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-amber-500 flex-shrink-0"></div>
+                        <span class="text-sm font-medium text-slate-700 leading-tight">Need Revision</span>
+                      </div>
+                      <div class="text-lg font-bold text-amber-600">{{ $needRevisionCount }}</div>
                     </div>
-                  </div>
-
-                  {{-- Widget Need Revision --}}
-                  <div class="flex flex-col items-center">
-                      <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
-                      <span class="text-yellow-600 font-semibold text-lg">{{ $needRevisionCount }}</span>
-                    </div>
-                    <div class="mt-2 text-center">
-                      <div class="text-xs text-slate-500">Need Revision</div>
+                    
+                    {{-- Rejected --}}
+                    <div class="status-card bg-white rounded-lg p-2 border border-red-100 flex items-center justify-between hover:shadow-md transition-shadow">
+                      <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500 flex-shrink-0"></div>
+                        <span class="text-sm font-medium text-slate-700 leading-tight">Rejected</span>
+                      </div>
+                      <div class="text-lg font-bold text-red-600">{{ $rejectedCount }}</div>
                     </div>
                   </div>
                 </div>
@@ -254,6 +350,122 @@
       </div>
     </div>
   </main>
+
+  {{-- Chart Scripts --}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Overall Status Pie Chart
+      const overallCtx = document.getElementById('overallChart')?.getContext('2d');
+      if (overallCtx) {
+        const totalSubmissions = {{ $acceptedCount + $pendingCount + $needRevisionCount + $rejectedCount }};
+        
+        // Show placeholder if no data
+        if (totalSubmissions === 0) {
+          new Chart(overallCtx, {
+            type: 'pie',
+            data: {
+              labels: ['No Submissions'],
+              datasets: [{
+                data: [1],
+                backgroundColor: ['#E5E7EB'],
+                borderWidth: 0,
+              }]
+            },
+            options: {
+              responsive: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+              },
+              maintainAspectRatio: false,
+              layout: { padding: 0 }
+            }
+          });
+        } else {
+          new Chart(overallCtx, {
+            type: 'pie',
+            data: {
+              labels: ['Accepted', 'Pending', 'Need Revision', 'Rejected'],
+              datasets: [{
+                data: [
+                  {{ $acceptedCount }}, 
+                  {{ $pendingCount }}, 
+                  {{ $needRevisionCount }}, 
+                  {{ $rejectedCount }}
+                ],
+                backgroundColor: [
+                  '#10B981', // emerald-500 untuk accepted
+                  '#3B82F6', // blue-500 untuk pending
+                  '#F59E0B', // amber-500 untuk need revision
+                  '#EF4444'  // red-500 untuk rejected
+                ],
+                borderWidth: 0,
+                borderRadius: 2,
+              }]
+            },
+            options: {
+              responsive: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      const label = context.label;
+                      const value = context.parsed;
+                      const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                      const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                      return `${label}: ${value} (${percentage}%)`;
+                    }
+                  }
+                }
+              },
+              maintainAspectRatio: false,
+              layout: { padding: 0 }
+            }
+          });
+        }
+      }
+
+      // Accepted Progress Donut Chart
+      const acceptedCtx = document.getElementById('acceptedChart')?.getContext('2d');
+      if (acceptedCtx) {
+        new Chart(acceptedCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Completed', 'Remaining'],
+            datasets: [{
+              data: [{{ $acceptedCount }}, {{ max(0, 32 - $acceptedCount) }}],
+              backgroundColor: [
+                '#10B981', // emerald-500 untuk progress
+                '#E5E7EB'  // gray-200 untuk sisa
+              ],
+              borderWidth: 0,
+              cutout: '70%',
+            }]
+          },
+          options: {
+            responsive: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    if (context.dataIndex === 0) {
+                      return `Accepted: ${context.parsed} activities`;
+                    } else {
+                      return `Remaining: ${context.parsed} activities`;
+                    }
+                  }
+                }
+              }
+            },
+            maintainAspectRatio: false,
+            layout: { padding: 0 }
+          }
+        });
+      }
+    });
+  </script>
 
   {{-- SKEM Chart --}}
   <script>
